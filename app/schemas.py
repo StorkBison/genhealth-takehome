@@ -9,7 +9,7 @@ ORDER_NUMBER_BASE = 10000
 
 
 def order_number(order_id: int) -> str:
-    return f"ORD-{ORDER_NUMBER_BASE + order_id}"
+    return f"GH-{ORDER_NUMBER_BASE + order_id}"
 
 
 class UserCreate(BaseModel):
@@ -60,8 +60,11 @@ class OrderOut(OrderBase):
     source_filename: str | None
     has_document: bool = False
     document_pages: int | None = None
+    document_type: str | None = None
     issues: dict[str, str]
     missing_fields: list[str] = []
+    # True when a person must act: extraction failed, or a value is missing or was rejected
+    needs_attention: bool = False
     # Text each extracted value was read from, for side-by-side review
     sources: dict[str, str] = {}
     raw_extraction: dict | None = None
@@ -77,10 +80,28 @@ class OrderList(BaseModel):
     offset: int
 
 
+class PeriodCounts(BaseModel):
+    total: int = 0
+    processed: int = 0        # approved (status ready)
+    in_review: int = 0        # processing, or waiting for a person with nothing flagged
+    needs_attention: int = 0  # failed, or missing/rejected values
+
+
+class DailyCount(BaseModel):
+    date: date
+    count: int
+
+
 class OrderStats(BaseModel):
+    # All-time counts by stored status
     total: int
     ready: int
     needs_review: int
     processing: int
     draft: int
     failed: int
+    # The last `days` days compared with the `days` before that
+    days: int
+    current: PeriodCounts
+    previous: PeriodCounts
+    daily: list[DailyCount]

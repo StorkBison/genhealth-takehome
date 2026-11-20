@@ -23,7 +23,7 @@ def make_pdf(pages: int = 1) -> bytes:
 
 
 def fake_extractor(values: dict, notes: dict | None = None):
-    def _extract(_data: bytes) -> ExtractionResult:
+    def _extract(_data: bytes, _media_type: str = "application/pdf") -> ExtractionResult:
         raw = {k: {"value": v, "source_text": v, "note": (notes or {}).get(k)} for k, v in values.items()}
         return ExtractionResult(values=values, notes=notes or {}, raw=raw)
     return lambda: _extract
@@ -104,11 +104,37 @@ def test_sample_order_npi_is_accepted(client):
     assert client.post(f"/orders/{oid}/approve", headers=h).json()["status"] == "ready"
 
 
+PNG_1PX = bytes.fromhex(
+    "89504e470d0a1a0a0000000d4948445200000001000000010806000000"
+    "1f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082"
+)
+
+
+def test_image_upload_is_accepted_and_served_with_its_type(client):
+    seen = {}
+
+    def extractor():
+        def _extract(data, media_type):
+            seen["media_type"] = media_type
+            return ExtractionResult(values=COMPLETE, raw={})
+        return _extract
+
+    app.dependency_overrides[get_extractor] = extractor
+    h = auth_headers(client)
+    # Named .pdf on purpose: the type comes from the bytes, not the file name
+    r = upload(client, h, data=PNG_1PX, name="scan.pdf", ctype="application/pdf")
+    assert r.status_code == 202, r.text
+    assert r.json()["document_type"] == "image/png" and r.json()["document_pages"] == 1
+    assert seen["media_type"] == "image/png"
+    doc = client.get(f"/orders/{r.json()['id']}/document", headers=h)
+    assert doc.headers["content-type"] == "image/png" and doc.content == PNG_1PX
+
+
 def test_upload_rejects_non_pdf(client):
     app.dependency_overrides[get_extractor] = fake_extractor({})
     r = upload(client, auth_headers(client), data=b"hello world", name="x.txt", ctype="text/plain")
     assert r.status_code == 422
-    assert "not a PDF" in r.json()["detail"]
+    assert "Unsupported file type" in r.json()["detail"]
 
 
 def test_upload_requires_auth(client):
@@ -118,7 +144,7 @@ def test_upload_requires_auth(client):
 
 def test_extraction_failure_marks_order_failed_and_can_retry(client):
     def failing():
-        def _extract(_):
+        def _extract(*_):
             raise ExtractionError("Could not reach the extraction service", 502)
         return _extract
     app.dependency_overrides[get_extractor] = failing

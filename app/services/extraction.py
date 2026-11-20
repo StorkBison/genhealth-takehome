@@ -92,6 +92,35 @@ USER_PROMPT = "Extract the order fields from this document."
 
 # ---------------------------------------------------------------- shared
 
+PDF = "application/pdf"
+IMAGE_TYPES = {b"\x89PNG\r\n\x1a\n": "image/png", b"\xff\xd8\xff": "image/jpeg"}
+MAX_IMAGE_MB = 5  # the per-image limit for inline images on the model APIs
+
+
+def sniff_type(data: bytes) -> str | None:
+    """Identify the file by its magic bytes, never by its name or the client's Content-Type."""
+    if data.lstrip()[:5] == b"%PDF-":
+        return PDF
+    for magic, media_type in IMAGE_TYPES.items():
+        if data.startswith(magic):
+            return media_type
+    return None
+
+
+def check_document(data: bytes, filename: str | None) -> tuple[str, int]:
+    """Validate an upload before spending tokens. Returns (media_type, page_count)."""
+    if len(data) == 0:
+        raise ExtractionError("Uploaded file is empty")
+    media_type = sniff_type(data)
+    if media_type is None:
+        raise ExtractionError("Unsupported file type. Upload a PDF, PNG or JPEG.")
+    if media_type == PDF:
+        return PDF, check_pdf(data, filename)
+    if len(data) > MAX_IMAGE_MB * 1024 * 1024:
+        raise ExtractionError(f"Images must be {MAX_IMAGE_MB} MB or smaller (PDFs up to {get_settings().max_upload_mb} MB)", 413)
+    return media_type, 1
+
+
 def check_pdf(data: bytes, filename: str | None) -> int:
     """Reject non-PDFs, oversized, encrypted or unreadable files before spending tokens. Returns page count."""
     s = get_settings()
@@ -139,12 +168,12 @@ def _to_result(text: str | None) -> ExtractionResult:
     return ExtractionResult(values=values, notes=notes, raw=parsed)
 
 
-def extract_order_fields(data: bytes) -> ExtractionResult:
+def extract_order_fields(data: bytes, media_type: str = PDF) -> ExtractionResult:
     provider = get_settings().extraction_provider
     if provider == "anthropic":
-        return _extract_anthropic(data)
+        return _extract_anthropic(data, media_type)
     if provider == "gemini":
-        return _extract_gemini(data)
+        return _extract_gemini(data, media_type)
     raise ExtractionError(f"Unknown EXTRACTION_PROVIDER '{provider}'", 503)
 
 
@@ -168,7 +197,7 @@ def _gemini_client():
     return genai.Client(api_key=s.gemini_api_key, http_options=types.HttpOptions(timeout=180_000))
 
 
-def _extract_gemini(data: bytes) -> ExtractionResult:
+def _extract_gemini(data: bytes, media_type: str = PDF) -> ExtractionResult:
     from google.genai import errors, types
 
     s = get_settings()
@@ -176,10 +205,10 @@ def _extract_gemini(data: bytes) -> ExtractionResult:
     uploaded = None
     try:
         if len(data) > GEMINI_INLINE_LIMIT:
-            uploaded = client.files.upload(file=io.BytesIO(data), config={"mime_type": "application/pdf"})
+            uploaded = client.files.upload(file=io.BytesIO(data), config={"mime_type": media_type})
             doc = uploaded
         else:
-            doc = types.Part.from_bytes(data=data, mime_type="application/pdf")
+            doc = types.Part.from_bytes(data=data, mime_type=media_type)
         config = types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
             temperature=0,
@@ -252,11 +281,17 @@ def _anthropic_client():
     return anthropic.Anthropic(api_key=s.anthropic_api_key, timeout=180, max_retries=2)
 
 
-def _extract_anthropic(data: bytes) -> ExtractionResult:
+def _extract_anthropic(data: bytes, media_type: str = PDF) -> ExtractionResult:
     import anthropic
 
     s = get_settings()
     client = _anthropic_client()
+    encoded = base64.standard_b64encode(data).decode()
+    source_block = (
+        {"type": "document", "source": {"type": "base64", "media_type": PDF, "data": encoded}}
+        if media_type == PDF
+        else {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": encoded}}
+    )
     try:
         response = client.beta.messages.create(
             model=s.anthropic_model,
@@ -270,17 +305,7 @@ def _extract_anthropic(data: bytes) -> ExtractionResult:
             },
             messages=[{
                 "role": "user",
-                "content": [
-                    {
-                        "type": "document",
-                        "source": {
-                            "type": "base64",
-                            "media_type": "application/pdf",
-                            "data": base64.standard_b64encode(data).decode(),
-                        },
-                    },
-                    {"type": "text", "text": USER_PROMPT},
-                ],
+                "content": [source_block, {"type": "text", "text": USER_PROMPT}],
             }],
         )
     except anthropic.RateLimitError as e:

@@ -1,300 +1,309 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GenHealth · Order Intake</title>
-<link rel="icon" type="image/svg+xml" href="genhealth-mark.svg?v=4">
+<title>GenHealth Â· Order Intake</title>
+<link rel="icon" type="image/svg+xml" href="genhealth-mark.svg?v=5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=4">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 
 <!-- ======================= SIGN IN ======================= -->
 <section class="auth" id="v-signin" hidden>
-  <div class="auth-art">
-    <div class="brand" data-logo>GenHealth</div>
-    <h1>Automate DME order intake with AI</h1>
-    <p>Extract, validate, and manage orders from faxed or scanned PDFs — faster, more accurately, and with fewer errors.</p>
-    <svg class="illus" viewBox="0 0 440 300" aria-hidden="true">
-      <ellipse cx="190" cy="270" rx="230" ry="70" fill="#E4DCFD"/>
-      <ellipse cx="190" cy="190" rx="150" ry="70" fill="#EDE7FE"/>
-      <rect x="112" y="34" width="176" height="222" rx="14" fill="#E9E2FE" transform="translate(-14 10)"/>
-      <path d="M126 30h118l44 44v168a14 14 0 0 1-14 14H126a14 14 0 0 1-14-14V44a14 14 0 0 1 14-14z" fill="#FFFFFF" stroke="#8D6BF7" stroke-width="3"/>
-      <path d="M244 30v30a14 14 0 0 0 14 14h30" fill="#DCD1FD" stroke="#8D6BF7" stroke-width="3" stroke-linejoin="round"/>
-      <text x="140" y="96" font-family="Inter, sans-serif" font-weight="800" font-size="28" fill="#5B30E8">DME</text>
-      <rect x="140" y="118" width="120" height="9" rx="4.5" fill="#D9CEFC"/>
-      <rect x="140" y="140" width="96" height="9" rx="4.5" fill="#D9CEFC"/>
-      <rect x="140" y="162" width="120" height="9" rx="4.5" fill="#D9CEFC"/>
-      <rect x="140" y="184" width="72" height="9" rx="4.5" fill="#D9CEFC"/>
-      <circle cx="282" cy="232" r="36" fill="#5B30E8"/>
-      <path d="M266 232l11 11 21-22" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </div>
-  <div class="auth-form">
-    <form id="f-signin" novalidate aria-labelledby="signin-h">
-      <div><h2 id="signin-h">Sign In</h2><p class="lead">Welcome back to GenHealth.</p></div>
-      <p class="formerr" id="si-err" role="alert" hidden></p>
-      <div class="field" id="si-email-f">
-        <label for="si-email">Email</label>
-        <div class="inwrap"><i data-icon="mail" class="lead-ic"></i><input class="input has-lead" id="si-email" type="email" autocomplete="email" placeholder="Enter your email" aria-describedby="si-email-e"></div>
-        <span class="err" id="si-email-e" hidden></span>
-      </div>
-      <div class="field" id="si-pw-f">
-        <label for="si-pw">Password</label>
-        <div class="inwrap"><i data-icon="lock" class="lead-ic"></i><input class="input has-lead has-trail" id="si-pw" type="password" autocomplete="current-password" placeholder="Enter your password" aria-describedby="si-pw-e"><button type="button" class="ghostbtn trail" data-reveal="si-pw" aria-label="Show password"><i data-icon="eye"></i></button></div>
-        <span class="err" id="si-pw-e" hidden></span>
-      </div>
-      <button class="btn btn-primary btn-block" type="submit" id="si-btn">Sign In</button>
-      <p class="auth-foot"><button type="button" class="linkbtn" id="forgot" style="font-size:15px">Forgot your password?</button></p>
-      <p class="formnote" id="forgot-note" hidden>Password reset by email isn't part of this MVP. Ask your administrator to reset your account, or create a new one.</p>
-      <p class="auth-foot">New to GenHealth? <a href="#/signup" style="font-weight:600">Create an account</a></p>
-    </form>
+  <div class="auth-body">
+    <div class="auth-side">
+      <span class="brand"><span class="brand-mark" aria-hidden="true"></span>GenHealth</span>
+      <h1>Order Intake</h1>
+      <p class="lead">Extract patient and provider details from faxed or scanned DME orders using AI.</p>
+      <p class="northstar sm" data-northstar></p>
+      <div data-illus></div>
+    </div>
+    <div class="auth-card">
+      <form id="f-signin" novalidate aria-labelledby="signin-h">
+        <div><h2 id="signin-h">Sign In</h2><p class="sub">Welcome back! Please sign in to your GenHealth account.</p></div>
+        <p class="formerr" id="si-err" role="alert" hidden></p>
+        <div class="field" id="si-email-f">
+          <label for="si-email">Email</label>
+          <div class="inwrap"><i data-icon="mail" data-size="22" class="lead-ic"></i><input class="input has-lead" id="si-email" type="email" autocomplete="email" placeholder="Enter your email" aria-describedby="si-email-e"></div>
+          <span class="err" id="si-email-e" hidden></span>
+        </div>
+        <div class="field" id="si-pw-f">
+          <label for="si-pw">Password</label>
+          <div class="inwrap"><i data-icon="lock" data-size="22" class="lead-ic"></i><input class="input has-lead has-trail" id="si-pw" type="password" autocomplete="current-password" placeholder="Enter your password" aria-describedby="si-pw-e"><button type="button" class="ghostbtn trail" data-reveal="si-pw" aria-label="Show password"><i data-icon="eye" data-size="22"></i></button></div>
+          <span class="err" id="si-pw-e" hidden></span>
+        </div>
+        <div class="forgot"><button type="button" class="linkbtn" id="forgot">Forgot password?</button></div>
+        <p class="formnote" id="forgot-note" hidden>Password reset by email isn't part of this MVP. Ask your administrator to reset your account, or create a new one.</p>
+        <button class="btn btn-primary btn-block" type="submit" id="si-btn">Sign In</button>
+        <hr>
+        <p class="foot">Don't have an account?<a href="#/signup">Create Account</a></p>
+      </form>
+    </div>
   </div>
 </section>
 
-<!-- ======================= SIGN UP ======================= -->
+<!-- ======================= CREATE ACCOUNT ======================= -->
 <section class="auth" id="v-signup" hidden>
-  <div class="auth-art">
-    <div class="brand" data-logo>GenHealth</div>
-    <h1>Create your GenHealth account</h1>
-    <p>Start automating DME order intake with AI in minutes.</p>
-    <svg class="illus" viewBox="0 0 440 300" aria-hidden="true">
-      <ellipse cx="200" cy="280" rx="230" ry="60" fill="#E4DCFD"/>
-      <rect x="82" y="92" width="236" height="150" rx="14" fill="#F7F5FF" stroke="#8D6BF7" stroke-width="3"/>
-      <rect x="96" y="106" width="208" height="122" rx="6" fill="#EFEAFE"/>
-      <path d="M58 250h284l-18 18H76z" fill="#B9A6FA"/>
-      <rect x="40" y="244" width="320" height="10" rx="5" fill="#8D6BF7"/>
-      <path d="M160 52h70l30 30v110a10 10 0 0 1-10 10H160a10 10 0 0 1-10-10V62a10 10 0 0 1 10-10z" fill="#FFFFFF" stroke="#8D6BF7" stroke-width="3"/>
-      <path d="M230 52v22a8 8 0 0 0 8 8h22" fill="#DCD1FD" stroke="#8D6BF7" stroke-width="3" stroke-linejoin="round"/>
-      <text x="168" y="104" font-family="Inter, sans-serif" font-weight="800" font-size="22" fill="#5B30E8">DME</text>
-      <rect x="168" y="120" width="72" height="7" rx="3.5" fill="#D9CEFC"/>
-      <rect x="168" y="136" width="58" height="7" rx="3.5" fill="#D9CEFC"/>
-      <rect x="168" y="152" width="72" height="7" rx="3.5" fill="#D9CEFC"/>
-      <circle cx="262" cy="196" r="26" fill="#5B30E8"/>
-      <path d="M262 208v-24M252 194l10-10 10 10" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M284 40l-6 14M302 56l-14 6M296 32l-4 8" stroke="#8D6BF7" stroke-width="4" stroke-linecap="round"/>
-    </svg>
+  <div class="auth-top">
+    <span class="brand"><span class="brand-mark" aria-hidden="true"></span>GenHealth</span>
+    <p class="already" style="margin:0">Already have an account?<a href="#/signin">Sign in</a></p>
   </div>
-  <div class="auth-form">
-    <form id="f-signup" novalidate aria-labelledby="signup-h">
-      <div><h2 id="signup-h">Create Account</h2><p class="lead">Get started with GenHealth.</p></div>
-      <p class="formerr" id="su-err" role="alert" hidden></p>
-      <div class="field" id="su-email-f">
-        <label for="su-email">Email</label>
-        <div class="inwrap"><i data-icon="mail" class="lead-ic"></i><input class="input has-lead" id="su-email" type="email" autocomplete="email" placeholder="Enter your email" aria-describedby="su-email-e"></div>
-        <span class="err" id="su-email-e" hidden></span>
-      </div>
-      <div class="field" id="su-pw-f">
-        <label for="su-pw">Password</label>
-        <div class="inwrap"><i data-icon="lock" class="lead-ic"></i><input class="input has-lead has-trail" id="su-pw" type="password" autocomplete="new-password" placeholder="Create a password" aria-describedby="su-pw-e su-rule"><button type="button" class="ghostbtn trail" data-reveal="su-pw" aria-label="Show password"><i data-icon="eye"></i></button></div>
-        <span class="err" id="su-pw-e" hidden></span>
-      </div>
-      <div class="field" id="su-pw2-f">
-        <label for="su-pw2">Confirm Password</label>
-        <div class="inwrap"><i data-icon="lock" class="lead-ic"></i><input class="input has-lead has-trail" id="su-pw2" type="password" autocomplete="new-password" placeholder="Confirm your password" aria-describedby="su-pw2-e"><button type="button" class="ghostbtn trail" data-reveal="su-pw2" aria-label="Show password"><i data-icon="eye"></i></button></div>
-        <span class="err" id="su-pw2-e" hidden></span>
-      </div>
-      <p class="rule" id="su-rule">Use at least 8 characters with a letter, number, and symbol.</p>
-      <button class="btn btn-primary btn-block" type="submit" id="su-btn">Create Account</button>
-      <p class="auth-foot">Already have an account? <a href="#/signin" style="font-weight:600">Sign In</a></p>
-    </form>
+  <div class="auth-body">
+    <div class="auth-side" style="align-items:center;flex:1 1 360px;max-width:460px"><div data-illus></div></div>
+    <div class="auth-card">
+      <form id="f-signup" novalidate aria-labelledby="signup-h">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <h2 id="signup-h">Create Account</h2>
+          <p class="northstar sm" data-northstar data-nospark></p>
+        </div>
+        <p class="desc">Create your GenHealth account to get started with order intake.</p>
+        <p class="formerr" id="su-err" role="alert" hidden></p>
+        <div class="field" id="su-email-f">
+          <label for="su-email">Email</label>
+          <div class="inwrap"><i data-icon="mail" data-size="22" class="lead-ic"></i><input class="input has-lead" id="su-email" type="email" autocomplete="email" placeholder="Enter your email" aria-describedby="su-email-e"></div>
+          <span class="err" id="su-email-e" hidden></span>
+        </div>
+        <div class="field" id="su-pw-f">
+          <label for="su-pw">Password</label>
+          <div class="inwrap"><i data-icon="lock" data-size="22" class="lead-ic"></i><input class="input has-lead has-trail" id="su-pw" type="password" autocomplete="new-password" placeholder="Create a password" aria-describedby="su-pw-e su-rule"><button type="button" class="ghostbtn trail" data-reveal="su-pw" aria-label="Show password"><i data-icon="eye" data-size="22"></i></button></div>
+          <span class="err" id="su-pw-e" hidden></span>
+        </div>
+        <div class="field" id="su-pw2-f">
+          <label for="su-pw2">Confirm Password</label>
+          <div class="inwrap"><i data-icon="lock" data-size="22" class="lead-ic"></i><input class="input has-lead has-trail" id="su-pw2" type="password" autocomplete="new-password" placeholder="Confirm your password" aria-describedby="su-pw2-e"><button type="button" class="ghostbtn trail" data-reveal="su-pw2" aria-label="Show password"><i data-icon="eye" data-size="22"></i></button></div>
+          <span class="err" id="su-pw2-e" hidden></span>
+        </div>
+        <p class="rule" id="su-rule">Use at least 8 characters with a letter, number, and symbol.</p>
+        <button class="btn btn-primary btn-block" type="submit" id="su-btn">Create Account</button>
+        <p class="legal">By creating an account, you agree to use it only for orders you're authorized to process.</p>
+      </form>
+    </div>
   </div>
 </section>
 
 <!-- ======================= APP ======================= -->
-<div class="app" id="app" hidden>
-  <aside class="sidebar">
-    <div class="brand" data-logo>GenHealth</div>
-    <nav class="nav" aria-label="Main">
-      <a href="#/dashboard" data-nav="dashboard"><i data-icon="home"></i>Dashboard</a>
-      <a href="#/orders" data-nav="orders"><i data-icon="orders"></i>Orders</a>
-      <a href="#/upload" data-nav="upload"><i data-icon="upload"></i>Upload Order</a>
-      <a href="#/settings" data-nav="settings"><i data-icon="settings"></i>Settings</a>
-    </nav>
-    <div class="userchip">
-      <button type="button" id="userBtn" aria-haspopup="menu" aria-expanded="false">
-        <span class="avatar" id="uAvatar"></span>
-        <span class="who"><b id="uName"></b><span id="uEmail"></span></span>
-        <i data-icon="chevDown" class="chev" data-size="16"></i>
-      </button>
-      <div class="menu" id="userMenu" role="menu" hidden>
-        <a href="#/settings" role="menuitem"><i data-icon="settings" data-size="16"></i>Settings</a>
-        <button type="button" role="menuitem" class="danger" id="signOut"><i data-icon="logout" data-size="16"></i>Sign out</button>
+<div id="shell" hidden>
+  <header class="topbar">
+    <a href="#/dashboard" class="brand sm" aria-label="GenHealth home"><span class="brand-mark" aria-hidden="true"></span>GenHealth</a>
+    <div class="right">
+      <a class="intake-pill" href="#/intake"><i data-icon="file" data-size="22"></i><span>Order Intake</span></a>
+      <a class="ghostbtn" href="/docs" target="_blank" rel="noopener" aria-label="Help: API documentation (opens in a new tab)" title="API documentation"><i data-icon="help" data-size="24"></i></a>
+      <div class="menuwrap">
+        <button type="button" class="ghostbtn" id="bellBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Notifications"><i data-icon="bell" data-size="24"></i><span class="dot" id="bellDot" hidden></span></button>
+        <div class="menu wide" id="bellMenu" role="menu" hidden></div>
+      </div>
+      <div class="menuwrap">
+        <button type="button" class="avatarbtn" id="userBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu"><span class="avatar" id="uAvatar"></span><i data-icon="chevDown" data-size="18"></i></button>
+        <div class="menu" id="userMenu" role="menu" hidden>
+          <div class="mhead"><b id="uName"></b><span id="uEmail"></span></div>
+          <a href="#/settings" role="menuitem"><i data-icon="settings" data-size="16"></i>Settings</a>
+          <button type="button" role="menuitem" class="danger" id="signOut"><i data-icon="logout" data-size="16"></i>Sign out</button>
+        </div>
       </div>
     </div>
-  </aside>
+  </header>
 
-  <main class="main" id="main">
-    <!-- DASHBOARD -->
-    <section class="view" id="v-dashboard" hidden aria-labelledby="dash-h">
-      <div class="pagehead">
-        <div><h1 id="dash-h">Dashboard</h1><p class="sub">An overview of your order intake.</p></div>
-        <a class="btn btn-primary" href="#/upload"><i data-icon="plus" data-size="18"></i>Upload Order</a>
-      </div>
-      <div class="stats" id="dash-stats"></div>
-      <div class="two">
+  <div class="app">
+    <aside class="sidebar">
+      <nav class="nav" aria-label="Main">
+        <a href="#/dashboard" data-nav="dashboard"><i data-icon="home" data-size="22"></i>Dashboard</a>
+        <a href="#/intake" data-nav="intake"><i data-icon="file" data-size="22"></i>Order Intake</a>
+        <a href="#/orders" data-nav="orders"><i data-icon="list" data-size="22"></i>Orders</a>
+        <a href="#/reports" data-nav="reports"><i data-icon="bars" data-size="22"></i>Reports</a>
+        <a href="#/settings" data-nav="settings"><i data-icon="settings" data-size="22"></i>Settings</a>
+      </nav>
+    </aside>
+
+    <main class="main" id="main">
+      <!-- DASHBOARD -->
+      <section class="view" id="v-dashboard" hidden aria-labelledby="dash-h">
+        <div class="pagehead">
+          <div class="titles"><h1 id="dash-h">Dashboard</h1><p class="northstar sm" data-northstar data-period></p></div>
+          <div class="selwrap lg"><i data-icon="calendar" class="lead-ic" data-size="20"></i><label class="sr" for="dash-days">Date range</label>
+            <select class="select has-lead" id="dash-days"><option value="7">Last 7 Days</option><option value="30" selected>Last 30 Days</option><option value="90">Last 90 Days</option></select>
+            <i data-icon="chevDown" class="chev" data-size="18"></i></div>
+        </div>
+        <div class="stats" id="dash-kpis"></div>
+        <div class="charts">
+          <div class="card panel">
+            <h2 id="trend-h">Order Trends</h2>
+            <div class="chartbox" id="trend" role="img" aria-labelledby="trend-h"></div>
+            <p class="chartnote" id="trend-note"></p>
+          </div>
+          <div class="card panel">
+            <h2 id="donut-h">Orders by Status</h2>
+            <div class="donutwrap"><div class="chartbox" id="donut"></div><ul class="legend" id="donut-legend" aria-label="Orders by status"></ul></div>
+          </div>
+        </div>
         <div class="card panel">
-          <h2>Needs your review <a href="#/orders?status=needs_review">View all</a></h2>
-          <ul class="olist" id="dash-review"></ul>
+          <h2>Recent Orders <a href="#/orders">View All Orders<i data-icon="arrowRight" data-size="18"></i></a></h2>
+          <div class="tablebox"><table><thead><tr><th scope="col">Order ID</th><th scope="col">Patient</th><th scope="col">Source</th><th scope="col">Provider</th><th scope="col">Status</th><th scope="col">Created</th></tr></thead><tbody id="dash-recent"></tbody></table></div>
+          <div class="emptystate" id="dash-empty" hidden></div>
         </div>
-        <div class="card panel">
-          <h2>Recent orders <a href="#/orders">View all</a></h2>
-          <ul class="olist" id="dash-recent"></ul>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ORDERS -->
-    <section class="view" id="v-orders" hidden aria-labelledby="orders-h">
-      <div class="pagehead">
-        <div><h1 id="orders-h">Orders</h1><p class="sub">DME orders extracted from fax or PDF documents.</p></div>
-        <a class="btn btn-primary" href="#/upload"><i data-icon="plus" data-size="18"></i>Upload Order</a>
-      </div>
-      <div class="stats" id="ord-stats"></div>
-      <div class="toolbar">
-        <label class="search"><span class="sr">Search orders</span><i data-icon="search" data-size="18"></i><input type="search" id="ord-q" placeholder="Search by patient, provider, NPI or order ID…" autocomplete="off"></label>
-        <div class="selwrap"><label class="sr" for="ord-status">Status</label>
-          <select class="select" id="ord-status">
-            <option value="">All Status</option><option value="ready">Ready</option><option value="needs_review">Needs Review</option>
-            <option value="processing">In Process</option><option value="draft">Draft</option><option value="failed">Failed</option>
-          </select><i data-icon="chevDown" class="chev" data-size="16"></i></div>
-        <div class="selwrap"><i data-icon="calendar" class="lead-ic" data-size="16"></i><label class="sr" for="ord-days">Date range</label>
-          <select class="select has-lead" id="ord-days">
-            <option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="">All time</option>
-          </select><i data-icon="chevDown" class="chev" data-size="16"></i></div>
-      </div>
-      <div class="card tablecard">
-        <div class="tablebox">
-          <table>
-            <thead><tr><th scope="col">Order ID</th><th scope="col">Patient</th><th scope="col">Provider</th><th scope="col">Order Date</th><th scope="col">Status</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
-            <tbody id="ord-rows"></tbody>
-          </table>
-        </div>
-        <div class="emptystate" id="ord-empty" hidden></div>
-        <div class="tfoot"><span id="ord-showing" aria-live="polite"></span><div class="pager" id="ord-pager"></div></div>
-      </div>
-    </section>
-
-    <!-- UPLOAD -->
-    <section class="view" id="v-upload" hidden aria-labelledby="up-h">
-      <div class="pagehead">
-        <div><h1 id="up-h">Upload Order</h1><p class="sub">Upload faxed or scanned DME order PDFs. Fields are extracted automatically, then you review them.</p></div>
-      </div>
-      <div class="dropzone" id="drop">
-        <div class="bub"><i data-icon="cloudUp" data-size="30"></i></div>
-        <h2>Drag and drop order PDFs here</h2>
-        <p>Scanned faxes and multi-page packets work. PDF only, up to 20 MB and 100 pages each.</p>
-        <label class="btn btn-primary filelabel"><i data-icon="upload" data-size="18"></i>Choose files<input type="file" id="up-file" accept="application/pdf,.pdf" multiple></label>
-      </div>
-      <div class="card" id="up-card" hidden>
-        <div class="panel" style="padding-bottom:4px"><h2>Uploads this session</h2></div>
-        <ul class="queue" id="up-queue" aria-live="polite"></ul>
-      </div>
-    </section>
-
-    <!-- REVIEW -->
-    <section class="view" id="v-review" hidden aria-labelledby="rv-h">
-      <div class="pagehead">
-        <div>
-          <nav class="crumbs" aria-label="Breadcrumb"><a href="#/orders"><i data-icon="arrowLeft" data-size="16"></i>Orders</a><span aria-hidden="true">/</span><b id="rv-crumb"></b></nav>
-          <h1 id="rv-h">Review Order</h1>
-          <p class="sub" id="rv-sub">Verify the extracted information before saving.</p>
-        </div>
-        <span id="rv-status"></span>
-      </div>
-
-      <div class="review">
-        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
-          <div class="card statecard" id="rv-processing" hidden>
-            <span class="spinner lg" aria-hidden="true"></span>
-            <h2>Reading the document…</h2>
-            <p>Patient and provider details are being extracted and checked. This page updates automatically, usually within a minute.</p>
+      <!-- ORDER INTAKE -->
+      <section class="view" id="v-intake" hidden aria-labelledby="in-h">
+        <div class="intake-hero">
+          <div class="txt">
+            <h1 id="in-h">Order Intake</h1>
+            <p class="lead">Extract patient and provider details from faxed or scanned DME orders using AI. Every value is checked, and you confirm it before it's saved as ready.</p>
+            <p class="northstar" data-northstar></p>
           </div>
-          <div class="card statecard" id="rv-failed" hidden>
-            <i data-icon="xCircle" data-size="40" style="color:var(--err)"></i>
-            <h2>Extraction failed</h2>
-            <p id="rv-failed-msg"></p>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-              <button type="button" class="btn btn-primary" id="rv-retry"><i data-icon="refresh" data-size="18"></i>Retry extraction</button>
-              <button type="button" class="btn btn-outline" id="rv-manual">Enter manually</button>
-            </div>
-          </div>
-
-          <form class="card fieldscard" id="rv-form" novalidate>
-            <p class="formerr" id="rv-err" role="alert" hidden></p>
-            <div class="section">
-              <h2 class="sechead"><i data-icon="user"></i>Patient Information</h2>
-              <div class="section" id="rv-patient"></div>
-            </div>
-            <div class="divider"></div>
-            <div class="section">
-              <h2 class="sechead"><i data-icon="steth"></i>Ordering Provider</h2>
-              <div class="section" id="rv-provider"></div>
-            </div>
-            <div class="notice" id="rv-notice" role="status"></div>
-          </form>
+          <div class="illus" data-illus></div>
         </div>
-
-        <div class="card doccard" id="rv-doc">
-          <div class="tabs" role="tablist" aria-label="Source">
-            <button type="button" role="tab" id="tab-src" aria-selected="true" aria-controls="pane-src">Source Document</button>
-            <button type="button" role="tab" id="tab-json" aria-selected="false" aria-controls="pane-json">Extraction JSON</button>
+        <div class="uploadcard">
+          <div class="dropzone" id="drop">
+            <i data-icon="cloudUp" data-size="64" class="cloud"></i>
+            <h2>Upload an order</h2>
+            <p>Drag and drop a PDF or image, or click to browse</p>
+            <label class="btn btn-primary filelabel"><i data-icon="upload" data-size="20"></i>Choose File<input type="file" id="up-file" accept="application/pdf,.pdf,image/png,image/jpeg,.png,.jpg,.jpeg" multiple></label>
           </div>
-          <div id="pane-src" role="tabpanel" aria-labelledby="tab-src" style="display:flex;flex-direction:column;gap:12px">
-            <div class="doctools" id="doc-tools">
-              <div class="pagenav">
-                <button type="button" class="iconbtn" id="pg-prev" aria-label="Previous page"><i data-icon="chevLeft" data-size="16"></i></button>
-                <span id="pg-label" aria-live="polite">Page 1 of 1</span>
-                <button type="button" class="iconbtn" id="pg-next" aria-label="Next page"><i data-icon="chevRight" data-size="16"></i></button>
+        </div>
+        <p class="formats"><i data-icon="file" data-size="18"></i>Supported formats: PDF, PNG, JPG, JPEG<span class="sep" aria-hidden="true">|</span>Max size: 20 MB (PDF), 5 MB (images)</p>
+        <div class="card" id="up-card" hidden style="max-width:960px;width:100%;margin:0 auto">
+          <div class="panel" style="padding-bottom:4px"><h2>Uploads this session</h2></div>
+          <ul class="queue" id="up-queue" aria-live="polite"></ul>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="view" id="v-orders" hidden aria-labelledby="orders-h">
+        <div class="pagehead">
+          <div class="titles"><h1 id="orders-h">Orders</h1><p class="sub" style="margin:0">Every order you've uploaded or entered, newest first.</p></div>
+          <a class="btn btn-primary" href="#/intake"><i data-icon="plus" data-size="18"></i>Upload Order</a>
+        </div>
+        <div class="toolbar">
+          <label class="search"><span class="sr">Search orders</span><i data-icon="search" data-size="18"></i><input type="search" id="ord-q" placeholder="Search by patient, provider, NPI or order ID (GH-â€¦)" autocomplete="off"></label>
+          <div class="selwrap"><label class="sr" for="ord-status">Status</label>
+            <select class="select" id="ord-status">
+              <option value="">All Statuses</option><option value="ready">Processed</option><option value="needs_review">In Review / Needs Attention</option>
+              <option value="processing">Processing</option><option value="draft">Draft</option><option value="failed">Failed</option>
+            </select><i data-icon="chevDown" class="chev" data-size="16"></i></div>
+          <div class="selwrap"><i data-icon="calendar" class="lead-ic" data-size="18"></i><label class="sr" for="ord-days">Date range</label>
+            <select class="select has-lead" id="ord-days"><option value="7">Last 7 Days</option><option value="30" selected>Last 30 Days</option><option value="90">Last 90 Days</option><option value="">All Time</option></select>
+            <i data-icon="chevDown" class="chev" data-size="16"></i></div>
+        </div>
+        <div class="card tablecard">
+          <div class="tablebox">
+            <table><thead><tr><th scope="col">Order ID</th><th scope="col">Patient</th><th scope="col">Provider</th><th scope="col">Status</th><th scope="col">Created</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody id="ord-rows"></tbody></table>
+          </div>
+          <div class="emptystate" id="ord-empty" hidden></div>
+          <div class="tfoot"><span id="ord-showing" aria-live="polite"></span><div class="pager" id="ord-pager"></div></div>
+        </div>
+      </section>
+
+      <!-- REVIEW -->
+      <section class="view" id="v-review" hidden aria-labelledby="rv-h">
+        <div class="pagehead">
+          <div>
+            <nav class="crumbs" aria-label="Breadcrumb"><a href="#/orders"><i data-icon="arrowLeft" data-size="16"></i>Orders</a><span aria-hidden="true">/</span><b id="rv-crumb"></b></nav>
+            <h1 id="rv-h">Review Order</h1>
+            <p class="sub" id="rv-sub"></p>
+          </div>
+          <span id="rv-status"></span>
+        </div>
+        <div class="review">
+          <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+            <div class="card statecard" id="rv-processing" hidden>
+              <span class="spinner lg" aria-hidden="true"></span><h2>Reading the documentâ€¦</h2>
+              <p>Patient and provider details are being extracted and checked. This page updates automatically.</p>
+            </div>
+            <div class="card statecard" id="rv-failed" hidden>
+              <i data-icon="xCircle" data-size="40" style="color:var(--err)"></i><h2>Extraction failed</h2><p id="rv-failed-msg"></p>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+                <button type="button" class="btn btn-primary" id="rv-retry"><i data-icon="refresh" data-size="18"></i>Retry extraction</button>
+                <button type="button" class="btn btn-outline" id="rv-manual">Enter manually</button>
               </div>
-              <div class="zoom"><label class="sr" for="zoom">Zoom</label>
-                <select id="zoom"><option value="fit">Fit width</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select>
-                <i data-icon="chevDown" data-size="16"></i></div>
             </div>
-            <div class="viewer" id="viewer"></div>
+            <form class="card fieldscard" id="rv-form" novalidate>
+              <p class="formerr" id="rv-err" role="alert" hidden></p>
+              <div class="section"><h2 class="sechead"><i data-icon="user"></i>Patient Information</h2><div class="section" id="rv-patient"></div></div>
+              <div class="divider"></div>
+              <div class="section"><h2 class="sechead"><i data-icon="steth"></i>Ordering Provider</h2><div class="section" id="rv-provider"></div></div>
+              <div class="notice" id="rv-notice" role="status"></div>
+            </form>
           </div>
-          <div id="pane-json" role="tabpanel" aria-labelledby="tab-json" hidden>
-            <pre class="json mono" id="json"></pre>
+          <div class="card doccard" id="rv-doc">
+            <div class="tabs" role="tablist" aria-label="Source">
+              <button type="button" role="tab" id="tab-src" aria-selected="true" aria-controls="pane-src">Source Document</button>
+              <button type="button" role="tab" id="tab-json" aria-selected="false" aria-controls="pane-json">Extraction JSON</button>
+            </div>
+            <div id="pane-src" role="tabpanel" aria-labelledby="tab-src" style="display:flex;flex-direction:column;gap:12px">
+              <div class="doctools" id="doc-tools">
+                <div class="pagenav">
+                  <button type="button" class="iconbtn" id="pg-prev" aria-label="Previous page"><i data-icon="chevLeft" data-size="16"></i></button>
+                  <span id="pg-label" aria-live="polite">Page 1 of 1</span>
+                  <button type="button" class="iconbtn" id="pg-next" aria-label="Next page"><i data-icon="chevRight" data-size="16"></i></button>
+                </div>
+                <div class="zoom"><label class="sr" for="zoom">Zoom</label>
+                  <select id="zoom"><option value="fit">Fit width</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select>
+                  <i data-icon="chevDown" data-size="16"></i></div>
+              </div>
+              <div class="viewer" id="viewer"></div>
+            </div>
+            <div id="pane-json" role="tabpanel" aria-labelledby="tab-json" hidden><pre class="json mono" id="json"></pre></div>
           </div>
         </div>
-      </div>
+        <div class="actionsbar" id="rv-actions">
+          <div class="grp">
+            <a class="btn btn-outline" href="#/orders"><i data-icon="arrowLeft" data-size="18"></i>Back</a>
+            <button type="button" class="btn btn-danger" id="rv-delete"><i data-icon="trash" data-size="18"></i>Delete</button>
+          </div>
+          <div class="grp">
+            <button type="button" class="btn btn-soft" id="rv-draft">Save as Draft</button>
+            <button type="button" class="btn btn-primary" id="rv-approve"><i data-icon="check" data-size="18"></i>Approve &amp; Save</button>
+          </div>
+        </div>
+      </section>
 
-      <div class="actionsbar" id="rv-actions">
-        <div class="grp">
-          <a class="btn btn-outline" href="#/orders"><i data-icon="arrowLeft" data-size="18"></i>Back</a>
-          <button type="button" class="btn btn-danger" id="rv-delete"><i data-icon="trash" data-size="18"></i>Delete</button>
+      <!-- REPORTS -->
+      <section class="view" id="v-reports" hidden aria-labelledby="rep-h">
+        <div class="pagehead">
+          <div class="titles"><h1 id="rep-h">Reports</h1><p class="sub" style="margin:0">Order volume and outcomes for the selected period, compared with the period before.</p></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div class="selwrap lg" style="flex-basis:220px"><i data-icon="calendar" class="lead-ic" data-size="20"></i><label class="sr" for="rep-days">Date range</label>
+              <select class="select has-lead" id="rep-days"><option value="7">Last 7 Days</option><option value="30" selected>Last 30 Days</option><option value="90">Last 90 Days</option></select>
+              <i data-icon="chevDown" class="chev" data-size="18"></i></div>
+            <button type="button" class="btn btn-primary" id="rep-csv" style="height:50px"><i data-icon="download" data-size="18"></i>Download CSV</button>
+          </div>
         </div>
-        <div class="grp">
-          <button type="button" class="btn btn-soft" id="rv-draft">Save as Draft</button>
-          <button type="button" class="btn btn-primary" id="rv-approve"><i data-icon="check" data-size="18"></i>Approve &amp; Save</button>
+        <div class="card panel">
+          <h2>Outcome summary</h2>
+          <div class="tablebox"><table class="rtable"><thead><tr><th scope="col">Metric</th><th scope="col" class="num">This period</th><th scope="col" class="num">Previous period</th><th scope="col" class="num">Change</th></tr></thead><tbody id="rep-summary"></tbody></table></div>
         </div>
-      </div>
-    </section>
+        <div class="card panel">
+          <h2>Daily volume</h2>
+          <div class="tablebox" style="max-height:420px;overflow:auto"><table class="rtable"><thead><tr><th scope="col">Date</th><th scope="col" class="num">Orders created</th></tr></thead><tbody id="rep-daily"></tbody></table></div>
+        </div>
+      </section>
 
-    <!-- SETTINGS -->
-    <section class="view" id="v-settings" hidden aria-labelledby="set-h">
-      <div class="pagehead"><div><h1 id="set-h">Settings</h1><p class="sub">Your account and API access.</p></div></div>
-      <div class="settings">
-        <div class="card panel">
-          <h2>Account</h2>
-          <div style="display:flex;align-items:center;gap:14px"><span class="avatar lg" id="set-avatar"></span><div><b id="set-name" style="font-size:16px"></b><div style="color:var(--muted)" id="set-email"></div></div></div>
-          <dl class="kv"><dt>Email</dt><dd id="set-email2"></dd><dt>Member since</dt><dd id="set-since"></dd><dt>Data access</dt><dd>You can only see orders created by this account.</dd></dl>
-          <div><button type="button" class="btn btn-outline" id="set-signout"><i data-icon="logout" data-size="18"></i>Sign out</button></div>
+      <!-- SETTINGS -->
+      <section class="view" id="v-settings" hidden aria-labelledby="set-h">
+        <div class="pagehead"><div class="titles"><h1 id="set-h">Settings</h1><p class="sub" style="margin:0">Your account and API access.</p></div></div>
+        <div class="settings">
+          <div class="card panel">
+            <h2>Account</h2>
+            <div style="display:flex;align-items:center;gap:14px"><span class="avatar lg" id="set-avatar"></span><div><b id="set-name" style="font-size:16px"></b><div style="color:var(--muted)" id="set-email"></div></div></div>
+            <dl class="kv"><dt>Email</dt><dd id="set-email2"></dd><dt>Member since</dt><dd id="set-since"></dd><dt>Data access</dt><dd>You can only see orders created by this account.</dd></dl>
+            <div><button type="button" class="btn btn-outline" id="set-signout"><i data-icon="logout" data-size="18"></i>Sign out</button></div>
+          </div>
+          <div class="card panel">
+            <h2>API</h2>
+            <p style="margin:0;color:var(--muted)">Everything in this app is available over the REST API with the same bearer token.</p>
+            <div><a class="btn btn-soft" href="/docs" target="_blank" rel="noopener"><i data-icon="code" data-size="18"></i>Open API documentation</a></div>
+          </div>
         </div>
-        <div class="card panel">
-          <h2>API</h2>
-          <p style="margin:0;color:var(--muted)">Everything in this app is available over the REST API with the same bearer token.</p>
-          <div><a class="btn btn-soft" href="/docs" target="_blank" rel="noopener"><i data-icon="code" data-size="18"></i>Open API documentation</a></div>
-        </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

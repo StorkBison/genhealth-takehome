@@ -57,7 +57,7 @@ def test_crud_and_approval(client):
     assert r.status_code == 201, r.text
     order = r.json()
     assert order["status"] == "draft"          # never auto-approved
-    assert order["order_number"] == f"ORD-{10000 + order['id']}"
+    assert order["order_number"] == f"GH-{10000 + order['id']}"
     oid = order["id"]
 
     r = client.post(f"/orders/{oid}/approve", headers=h)
@@ -126,4 +126,19 @@ def test_search_filter_and_stats(client):
     assert search(days=30) == 2
 
     stats = client.get("/orders/stats", headers=h).json()
-    assert stats == {"total": 2, "ready": 1, "needs_review": 0, "processing": 0, "draft": 1, "failed": 0}
+    assert {k: stats[k] for k in ("total", "ready", "needs_review", "processing", "draft", "failed")} == {
+        "total": 2, "ready": 1, "needs_review": 0, "processing": 0, "draft": 1, "failed": 0}
+    # Last 30 days vs the 30 before: one approved (processed), one complete draft (in review)
+    assert stats["days"] == 30
+    assert stats["current"] == {"total": 2, "processed": 1, "in_review": 1, "needs_attention": 0}
+    assert stats["previous"]["total"] == 0
+    assert len(stats["daily"]) == 30 and stats["daily"][-1]["count"] == 2
+
+
+def test_incomplete_draft_needs_attention(client):
+    h = auth_headers(client)
+    o = client.post("/orders", json={"patient_first_name": "Mei"}, headers=h).json()
+    assert o["needs_attention"] is True
+    stats = client.get("/orders/stats?days=7", headers=h).json()
+    assert stats["current"]["needs_attention"] == 1 and len(stats["daily"]) == 7
+    assert client.get("/orders", params={"q": o["order_number"]}, headers=h).json()["total"] == 1

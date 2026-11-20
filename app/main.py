@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import inspect, text
 
 from app import models  # noqa: F401  (registers tables on Base.metadata)
 from app.config import get_settings
@@ -16,6 +17,24 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 DEFAULT_SECRET = "change-me-in-production"
 
 
+def add_missing_columns() -> None:
+    """Tiny forward-only migration for nullable columns added after a database was created.
+
+    create_all() makes new tables but never alters existing ones. A real deployment would use Alembic.
+    """
+    inspector = inspect(engine)
+    for table in Base.metadata.sorted_tables:
+        if not inspector.has_table(table.name):
+            continue
+        existing = {c["name"] for c in inspector.get_columns(table.name)}
+        for column in table.columns:
+            if column.name not in existing and column.nullable:
+                ddl = column.type.compile(dialect=engine.dialect)
+                with engine.begin() as conn:
+                    conn.execute(text(f'ALTER TABLE {table.name} ADD COLUMN {column.name} {ddl}'))
+                logging.getLogger(__name__).info("Added column %s.%s", table.name, column.name)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     s = get_settings()
@@ -23,6 +42,7 @@ async def lifespan(_: FastAPI):
         raise RuntimeError("JWT_SECRET must be set to a strong value in production")
     # MVP: create tables on boot. A real deployment would run Alembic migrations instead.
     Base.metadata.create_all(bind=engine)
+    add_missing_columns()
     with SessionLocal() as db:
         orders.mark_interrupted_extractions(db)
     yield

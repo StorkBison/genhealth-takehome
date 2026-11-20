@@ -47,6 +47,7 @@ class Order(Base):
     # The uploaded PDF, kept so reviewers can compare fields against the source. Deferred: list queries never load it.
     document: Mapped[bytes | None] = mapped_column(LargeBinary, deferred=True)
     document_pages: Mapped[int | None] = mapped_column(Integer)
+    document_type: Mapped[str | None] = mapped_column(String(50))  # application/pdf, image/png or image/jpeg
     # Per-field problems found during extraction/validation, e.g. {"provider_npi": "failed check-digit validation"}
     issues: Mapped[dict] = mapped_column(JSON, default=dict)
     # Raw model output (value, source_text, note per field), kept for audit

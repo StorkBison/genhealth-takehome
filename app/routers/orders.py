@@ -10,8 +10,10 @@ from app.auth import get_current_user
 from app.config import get_settings
 from app.database import SessionLocal, get_db
 from app.models import Order, OrderStatus, User
-from app.schemas import ORDER_NUMBER_BASE, OrderCreate, OrderList, OrderOut, OrderStats, OrderUpdate, order_number
-from app.services.extraction import ExtractionError, check_pdf, extract_order_fields, is_configured
+from app.schemas import (
+    ORDER_NUMBER_BASE, DailyCount, OrderCreate, OrderList, OrderOut, OrderStats, OrderUpdate, PeriodCounts, order_number,
+)
+from app.services.extraction import PDF, ExtractionError, check_document, extract_order_fields, is_configured
 from app.services.validation import missing_fields, validate_fields
 
 log = logging.getLogger(__name__)
@@ -25,6 +27,7 @@ def to_out(order: Order) -> OrderOut:
     out.order_number = order_number(order.id)
     out.has_document = order.source_filename is not None
     out.missing_fields = missing_fields({f: getattr(order, f) for f in ORDER_FIELDS})
+    out.needs_attention = bucket(order) == "needs_attention"
     raw = order.raw_extraction or {}
     out.sources = {
         f: raw[f]["source_text"]
@@ -69,14 +72,14 @@ def get_extractor():
     return extract_order_fields
 
 
-def run_extraction(order_id: int, data: bytes, extractor) -> None:
+def run_extraction(order_id: int, data: bytes, media_type: str, extractor) -> None:
     """Runs after the upload response is sent. Uses its own DB session."""
     with SessionLocal() as db:
         order = db.get(Order, order_id)
         if order is None:  # deleted while processing
             return
         try:
-            result = extractor(data)
+            result = extractor(data, media_type)
         except ExtractionError as e:
             order.status = OrderStatus.failed
             order.error_message = e.message
@@ -126,14 +129,15 @@ def _require_configured(extractor) -> None:
 @router.post("/upload", response_model=OrderOut, status_code=status.HTTP_202_ACCEPTED)
 def upload_order_pdf(
     background: BackgroundTasks,
-    file: UploadFile = File(..., description="DME order PDF (scanned or digital)"),
+    file: UploadFile = File(..., description="Order document: PDF (scanned or digital, up to 20 MB) or PNG/JPEG image (up to 5 MB)"),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     extractor=Depends(get_extractor),
 ):
-    """Create an order from a PDF.
+    """Create an order from a PDF or a PNG/JPEG image of the order.
 
-    The file is checked and stored, and the order is returned at once with status `processing`.
+    The file type is identified from its content, not its name. The file is checked and stored, and
+    the order is returned at once with status `processing`.
     Extraction then runs in the background; poll `GET /orders/{id}` until the status changes to
     `needs_review` (or `failed`). Extracted values pass through the same validators as manual input:
     an invalid value is not saved (left null, reason in `issues`), and a field the document doesn't
@@ -141,22 +145,23 @@ def upload_order_pdf(
     """
     data = file.file.read(get_settings().max_upload_mb * 1024 * 1024 + 1)
     try:
-        pages = check_pdf(data, file.filename)
+        media_type, pages = check_document(data, file.filename)
     except ExtractionError as e:
         raise HTTPException(e.status_code, e.message)
     _require_configured(extractor)
 
     order = Order(
         owner_id=user.id,
-        source_filename=(file.filename or "upload.pdf")[:255],
+        source_filename=(file.filename or "upload")[:255],
         document=data,
         document_pages=pages,
+        document_type=media_type,
         status=OrderStatus.processing,
         issues={},
     )
     db.add(order)
     db.commit()
-    background.add_task(run_extraction, order.id, data, extractor)
+    background.add_task(run_extraction, order.id, data, media_type, extractor)
     return to_out(order)
 
 
@@ -177,7 +182,7 @@ def retry_extraction(
     order.status = OrderStatus.processing
     order.error_message = None
     db.commit()
-    background.add_task(run_extraction, order.id, order.document, extractor)
+    background.add_task(run_extraction, order.id, order.document, order.document_type or PDF, extractor)
     return to_out(order)
 
 
@@ -186,10 +191,10 @@ def get_document(order_id: int, user: User = Depends(get_current_user), db: Sess
     order = get_owned_order(order_id, user, db)
     if not order.document:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "This order has no source document")
-    safe_name = re.sub(r"[^A-Za-z0-9._-]", "_", order.source_filename or "order.pdf")
+    safe_name = re.sub(r"[^A-Za-z0-9._-]", "_", order.source_filename or "order")
     return Response(
         order.document,
-        media_type="application/pdf",
+        media_type=order.document_type or PDF,
         headers={"Content-Disposition": f'inline; filename="{safe_name}"', "Cache-Control": "private, no-store"},
     )
 
@@ -206,21 +211,68 @@ def create_order(body: OrderCreate, user: User = Depends(get_current_user), db: 
     return to_out(order)
 
 
+def bucket(order: Order) -> str:
+    """Group an order for the dashboard: processed, in_review or needs_attention."""
+    if order.status == OrderStatus.ready:
+        return "processed"
+    if order.status == OrderStatus.failed:
+        return "needs_attention"
+    if order.status in (OrderStatus.needs_review, OrderStatus.draft) and (
+        order.issues or missing_fields({f: getattr(order, f) for f in ORDER_FIELDS})
+    ):
+        return "needs_attention"
+    return "in_review"
+
+
+def _utc(ts: datetime) -> datetime:
+    return ts if ts.tzinfo else ts.replace(tzinfo=timezone.utc)  # SQLite returns naive UTC
+
+
 @router.get("/stats", response_model=OrderStats)
-def order_stats(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def order_stats(
+    days: int = Query(default=30, ge=1, le=365, description="Length of the reporting period in days"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """All-time counts by status, plus the last `days` days compared with the period before, and daily volume."""
     rows = db.execute(
         select(Order.status, func.count()).where(Order.owner_id == user.id).group_by(Order.status)
     ).all()
     counts = {s.value: 0 for s in OrderStatus}
     for s, n in rows:
         counts[s.value] = n
-    return OrderStats(total=sum(counts.values()), **counts)
+
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(days=days)
+    prev_start = start - timedelta(days=days)
+    recent = db.scalars(
+        select(Order).where(Order.owner_id == user.id, Order.created_at >= prev_start)
+    ).all()
+    current, previous = PeriodCounts(), PeriodCounts()
+    first_day = (now - timedelta(days=days - 1)).date()
+    per_day = {first_day + timedelta(days=i): 0 for i in range(days)}
+    for o in recent:
+        created = _utc(o.created_at)
+        period = current if created >= start else previous
+        period.total += 1
+        b = bucket(o)
+        setattr(period, b, getattr(period, b) + 1)
+        if created.date() in per_day:
+            per_day[created.date()] += 1
+    return OrderStats(
+        total=sum(counts.values()),
+        **counts,
+        days=days,
+        current=current,
+        previous=previous,
+        daily=[DailyCount(date=d, count=n) for d, n in per_day.items()],
+    )
 
 
 @router.get("", response_model=OrderList)
 def list_orders(
     status_filter: OrderStatus | None = Query(default=None, alias="status"),
-    q: str | None = Query(default=None, max_length=100, description="Search patient, provider, NPI, file name or ORD- number"),
+    q: str | None = Query(default=None, max_length=100, description="Search patient, provider, NPI, file name or GH- order number"),
     days: int | None = Query(default=None, ge=1, le=3650, description="Only orders created in the last N days"),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
@@ -242,7 +294,7 @@ def list_orders(
             Order.provider_npi.like(term),
             Order.source_filename.ilike(term),
         ]
-        m = re.fullmatch(r"\s*(?:ord-?)?(\d{5,9})\s*", q, re.IGNORECASE)
+        m = re.fullmatch(r"\s*(?:(?:gh|ord)-?)?(\d{5,9})\s*", q, re.IGNORECASE)
         if m:
             conds.append(Order.id == int(m.group(1)) - ORDER_NUMBER_BASE)
         query = query.where(or_(*conds))
