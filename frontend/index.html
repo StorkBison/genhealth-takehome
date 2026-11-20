@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ SIGN IN ============ -->
+<section class="screen" id="signin" aria-label="Sign in">
+  <div class="auth">
+    <div class="side">
+      <div class="brand" style="font-size:18px">
+        <svg width="32" height="32" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" fill="currentColor" opacity=".18"/><path d="M9 8h7l4 4v8H9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15l2 2 3-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Order Intake
+      </div>
+      <h2>Faxed DME orders in, checked data out.</h2>
+      <ul>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"/></svg>Upload scanned or digital PDFs, including multi-page packets.</li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"/></svg>Patient name, date of birth, provider and NPI are read and validated.</li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"/></svg>Anything unclear is left for you to review, never guessed.</li>
+      </ul>
+    </div>
+    <div class="form">
+      <form id="authForm" novalidate aria-label="Sign in form">
+        <div class="seg" role="tablist" aria-label="Account">
+          <button type="button" role="tab" aria-selected="true" id="tabIn">Sign in</button>
+          <button type="button" role="tab" aria-selected="false" id="tabUp">Create account</button>
+        </div>
+        <p class="formerr" id="authErr" role="alert" hidden></p>
+        <div class="field" id="emField">
+          <label for="em">Email</label>
+          <input id="em" name="email" type="email" autocomplete="email" placeholder="you@clinic.example" aria-describedby="emErr">
+          <span class="err" id="emErr" hidden></span>
+        </div>
+        <div class="field" id="pwField">
+          <label for="pw">Password</label>
+          <input id="pw" name="password" type="password" autocomplete="current-password" aria-describedby="pwErr pwHint">
+          <span class="err" id="pwErr" hidden></span>
+          <p class="hint" id="pwHint" hidden>At least 8 characters.</p>
+        </div>
+        <button class="btn btn-primary" type="submit" id="authBtn">Sign in</button>
+        <p class="hint">Each account sees only its own orders.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP SHELL ============ -->
+<div id="shell" hidden>
+  <header class="topbar"><div class="wrap">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" fill="var(--accent)"/><path d="M9 8h7l4 4v8H9z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15l2 2 3-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Order Intake
+    </div>
+    <nav aria-label="Account"><span id="who"></span><button type="button" class="linkbtn" id="signOut">Sign out</button></nav>
+  </div></header>
+
+  <!-- ORDERS -->
+  <section class="screen" id="orders" aria-label="Orders">
+    <main><div class="wrap stack">
+      <div class="head">
+        <div><h1>Orders</h1><p class="sub">Upload a faxed order and check what was read before it goes to billing.</p></div>
+        <button class="btn btn-secondary" type="button" id="newManual">New order manually</button>
+      </div>
+
+      <div class="drop" id="drop">
+        <div class="ico" id="dropIco"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></div>
+        <div class="txt" aria-live="polite"><p class="t1" id="dropTitle">Drop an order PDF here</p><p class="t2" id="dropSub">Scanned faxes and multi-page packets work. PDF only, up to 20 MB and 100 pages.</p></div>
+        <label class="btn btn-primary filelabel" id="chooseBtn">Choose PDF<input type="file" accept="application/pdf,.pdf" id="file"></label>
+      </div>
+
+      <div class="card" style="overflow:hidden">
+        <div class="tabs" role="tablist" aria-label="Filter by status" id="tabs"></div>
+        <div class="tablebox">
+          <table>
+            <thead><tr><th scope="col">Patient</th><th scope="col">Date of birth</th><th scope="col">Ordering provider</th><th scope="col">NPI</th><th scope="col">Source</th><th scope="col">Status</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="empty" hidden></p>
+      </div>
+    </div></main>
+  </section>
+
+  <!-- REVIEW / EDIT -->
+  <section class="screen" id="review" aria-label="Review order">
+    <main><div class="wrap stack">
+      <div class="head">
+        <div>
+          <button type="button" class="linkbtn" data-go="orders">← All orders</button>
+          <h1 style="margin-top:8px"><span id="rvTitle">Order</span> <span class="pill" id="rvPill" style="vertical-align:middle;margin-left:8px"></span></h1>
+          <p class="sub" id="rvSub"></p>
+        </div>
+      </div>
+
+      <div class="banner" role="status" id="rvBanner" hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        <div><p style="font-weight:600" id="rvBannerTitle"></p><p style="font-size:14px" id="rvBannerText"></p></div>
+      </div>
+
+      <div class="split">
+        <div class="card docpane" aria-label="Uploaded document" id="docPane">
+          <iframe class="docframe" id="docFrame" title="Uploaded PDF" hidden></iframe>
+          <div class="page" id="docPlaceholder">The original PDF is shown here right after upload. It isn't stored on the server.</div>
+        </div>
+
+        <form class="card fields" id="orderForm" novalidate aria-label="Order fields">
+          <p class="formerr" id="formErr" role="alert" hidden></p>
+          <h2 style="margin:0;font-size:18px">Patient</h2>
+          <div class="grid2" id="grpPatient"></div>
+          <div id="grpDob"></div>
+          <h2 style="margin:8px 0 0;font-size:18px">Ordering provider</h2>
+          <div id="grpProvider" class="stack" style="gap:20px"></div>
+          <div class="actions">
+            <button class="btn btn-danger" type="button" id="delBtn">Delete order</button>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button class="btn btn-secondary" type="button" data-go="orders">Cancel</button>
+              <button class="btn btn-primary" type="submit" id="saveBtn">Save changes</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div></main>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

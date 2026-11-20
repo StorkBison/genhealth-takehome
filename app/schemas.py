@@ -45,6 +45,8 @@ class OrderOut(OrderBase):
     source_filename: str | None
     issues: dict[str, str]
     missing_fields: list[str] = []
+    # Text each extracted value was read from (PDF orders only), for side-by-side review
+    sources: dict[str, str] = {}
     created_at: datetime
     updated_at: datetime
 

@@ -18,6 +18,12 @@ ORDER_FIELDS = ("patient_first_name", "patient_last_name", "patient_dob", "provi
 def to_out(order: Order) -> OrderOut:
     out = OrderOut.model_validate(order)
     out.missing_fields = missing_fields({f: getattr(order, f) for f in ORDER_FIELDS})
+    raw = order.raw_extraction or {}
+    out.sources = {
+        f: raw[f]["source_text"]
+        for f in ORDER_FIELDS
+        if isinstance(raw.get(f), dict) and isinstance(raw[f].get("source_text"), str) and raw[f]["source_text"]
+    }
     return out
 
 

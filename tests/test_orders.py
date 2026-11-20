@@ -9,6 +9,27 @@ FULL_ORDER = {
 }
 
 
+def test_frontend_is_served(client):
+    r = client.get("/", follow_redirects=False)
+    assert r.headers["location"] == "/app/"
+    r = client.get("/app/")
+    assert r.status_code == 200 and "Order Intake" in r.text
+    assert client.get("/app/app.js").status_code == 200
+
+
+def test_wrong_password_and_unknown_email_get_same_error(client):
+    auth_headers(client)
+    wrong_pw = client.post("/auth/token", data={"username": "alice@example.com", "password": "nope-nope"})
+    unknown = client.post("/auth/token", data={"username": "nobody@example.com", "password": "password123"})
+    assert wrong_pw.status_code == unknown.status_code == 401
+    assert wrong_pw.json() == unknown.json()   # no account enumeration
+
+
+def test_register_validates_email_and_password(client):
+    assert client.post("/auth/register", json={"email": "not-an-email", "password": "password123"}).status_code == 422
+    assert client.post("/auth/register", json={"email": "a@example.com", "password": "short"}).status_code == 422
+
+
 def test_requires_auth(client):
     assert client.get("/orders").status_code == 401
     assert client.post("/orders", json=FULL_ORDER).status_code == 401
