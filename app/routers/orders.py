@@ -90,6 +90,10 @@ def run_extraction(order_id: int, data: bytes, extractor) -> None:
             return
 
         clean, issues = validate_fields(result.values)
+        # Show the reviewer exactly what was read when a value was rejected, so they can check it against the PDF.
+        for name, error in list(issues.items()):
+            if result.values.get(name):
+                issues[name] = f'read "{result.values[name]}": {error}'
         for name, note in result.notes.items():
             if clean.get(name) is None and name not in issues:
                 issues[name] = f"not extracted: {note}"
