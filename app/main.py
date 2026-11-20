@@ -74,7 +74,6 @@ app = FastAPI(
 )
 app.include_router(auth.router)
 app.include_router(orders.router)
-
 # Browser UI (plain JS), served from the same origin so it can call the API without CORS.
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 class FrontendFiles(StaticFiles):
