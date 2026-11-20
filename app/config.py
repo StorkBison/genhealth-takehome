@@ -12,9 +12,13 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 12
 
+    # Which LLM reads the PDFs: "gemini" (default) or "anthropic"
+    extraction_provider: str = "gemini"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
     anthropic_api_key: str | None = None
-    extraction_model: str = "claude-opus-5-5"
-    extraction_effort: str = "medium"
+    anthropic_model: str = "claude-opus-5-5"
+    anthropic_effort: str = "medium"
 
     max_upload_mb: int = 20
     max_pdf_pages: int = 100

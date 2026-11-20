@@ -11,7 +11,7 @@ from app.config import get_settings
 from app.database import SessionLocal, get_db
 from app.models import Order, OrderStatus, User
 from app.schemas import ORDER_NUMBER_BASE, OrderCreate, OrderList, OrderOut, OrderStats, OrderUpdate, order_number
-from app.services.extraction import ExtractionError, check_pdf, extract_order_fields
+from app.services.extraction import ExtractionError, check_pdf, extract_order_fields, is_configured
 from app.services.validation import missing_fields, validate_fields
 
 log = logging.getLogger(__name__)
@@ -114,8 +114,9 @@ def mark_interrupted_extractions(db: Session) -> None:
 
 
 def _require_configured(extractor) -> None:
-    if extractor is extract_order_fields and not get_settings().anthropic_api_key:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Extraction is not configured (ANTHROPIC_API_KEY missing)")
+    if extractor is extract_order_fields and not is_configured():
+        key = "ANTHROPIC_API_KEY" if get_settings().extraction_provider == "anthropic" else "GEMINI_API_KEY"
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, f"Extraction is not configured ({key} missing)")
 
 
 @router.post("/upload", response_model=OrderOut, status_code=status.HTTP_202_ACCEPTED)

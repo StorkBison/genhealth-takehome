@@ -6,6 +6,7 @@ pydantic-settings
 PyJWT==2.15.1
 bcrypt==5.0.0
 python-multipart==0.0.34
+google-genai==3.6.1
 anthropic==2.11.0
 psycopg[binary]==3.3.9
 pypdf==7.1.1
