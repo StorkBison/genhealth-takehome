@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import models  # noqa: F401  (registers tables on Base.metadata)
 from app.config import get_settings
-from app.database import Base, engine
+from app.database import Base, SessionLocal, engine
 from app.routers import auth, orders
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -23,6 +23,8 @@ async def lifespan(_: FastAPI):
         raise RuntimeError("JWT_SECRET must be set to a strong value in production")
     # MVP: create tables on boot. A real deployment would run Alembic migrations instead.
     Base.metadata.create_all(bind=engine)
+    with SessionLocal() as db:
+        orders.mark_interrupted_extractions(db)
     yield
 
 

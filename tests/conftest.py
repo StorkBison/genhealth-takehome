@@ -25,7 +25,10 @@ def client():
     app.dependency_overrides.clear()
 
 
-def auth_headers(client: TestClient, email: str = "alice@example.com", password: str = "password123") -> dict:
+PASSWORD = "Passw0rd!x"
+
+
+def auth_headers(client: TestClient, email: str = "alice@example.com", password: str = PASSWORD) -> dict:
     client.post("/auth/register", json={"email": email, "password": password})
     r = client.post("/auth/token", data={"username": email, "password": password})
     assert r.status_code == 200, r.text
