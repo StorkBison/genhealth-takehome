@@ -41,8 +41,17 @@ app.include_router(orders.router)
 
 # Browser UI (plain JS), served from the same origin so it can call the API without CORS.
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+class FrontendFiles(StaticFiles):
+    """Static files that browsers must revalidate, so a deploy never shows a stale mix of old and new assets."""
+
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
 if FRONTEND_DIR.is_dir():
-    app.mount("/app", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+    app.mount("/app", FrontendFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
 
 @app.get("/", include_in_schema=False)

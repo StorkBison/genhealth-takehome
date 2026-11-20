@@ -14,7 +14,9 @@ def test_frontend_is_served(client):
     assert r.headers["location"] == "/app/"
     r = client.get("/app/")
     assert r.status_code == 200 and "GenHealth" in r.text
-    assert client.get("/app/app.js").status_code == 200
+    js = client.get("/app/app.js")
+    assert js.status_code == 200
+    assert js.headers["cache-control"] == "no-cache"   # browsers revalidate, so no stale UI after changes
 
 
 def test_requires_auth(client):
