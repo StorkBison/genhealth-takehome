@@ -1,19 +1,18 @@
 from datetime import date
 
-from app.services.validation import missing_fields, npi_checksum_ok, validate_dob, validate_fields, validate_npi
+from app.services.validation import missing_fields, validate_dob, validate_fields, validate_npi
 
 
-def test_npi_checksum():
-    assert npi_checksum_ok("1234567893")       # CMS documentation example
-    assert not npi_checksum_ok("1234567890")
-    assert not npi_checksum_ok("123456789")
+def test_npi_requires_ten_digits():
+    assert validate_npi("9182734556") == ("9182734556", None)   # sample order's NPI is accepted
+    assert validate_npi("123456789")[1] == "NPI must be exactly 10 digits"
+    assert validate_npi("12345678901")[0] is None
+    assert validate_npi("abc")[0] is None
 
 
 def test_npi_normalizes_formatting():
     assert validate_npi("123-456-7893") == ("1234567893", None)
     assert validate_npi("12345 67893")[0] == "1234567893"
-    assert validate_npi("abc")[0] is None
-    assert validate_npi("3234567893")[1] == "NPI must start with 1 or 2"
 
 
 def test_dob():

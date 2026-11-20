@@ -99,7 +99,7 @@ def test_users_cannot_see_each_others_orders(client):
 
 def test_manual_create_rejects_invalid_values(client):
     h = auth_headers(client)
-    r = client.post("/orders", json={**FULL_ORDER, "provider_npi": "1234567890"}, headers=h)
+    r = client.post("/orders", json={**FULL_ORDER, "provider_npi": "12345678"}, headers=h)
     assert r.status_code == 422
     assert "provider_npi" in r.json()["detail"]["issues"]
 

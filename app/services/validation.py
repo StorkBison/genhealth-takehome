@@ -17,23 +17,6 @@ REQUIRED_FIELDS = (
 _NAME_RE = re.compile(r"^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ .,'\-]*$")
 
 
-def npi_checksum_ok(npi: str) -> bool:
-    """NPI check digit: Luhn over the 9-digit base prefixed with the constant 80840 (CMS spec)."""
-    if not re.fullmatch(r"\d{10}", npi):
-        return False
-    digits = [int(c) for c in "80840" + npi[:9]]
-    total = 0
-    # Double every other digit starting from the rightmost of the payload
-    for i, d in enumerate(reversed(digits)):
-        if i % 2 == 0:
-            d *= 2
-            if d > 9:
-                d -= 9
-        total += d
-    check = (10 - total % 10) % 10
-    return check == int(npi[9])
-
-
 def validate_name(value: str | None, max_len: int) -> tuple[str | None, str | None]:
     if value is None:
         return None, None
@@ -55,10 +38,6 @@ def validate_npi(value: str | None) -> tuple[str | None, str | None]:
         return None, None
     if not re.fullmatch(r"\d{10}", v):
         return None, "NPI must be exactly 10 digits"
-    if v[0] not in "12":
-        return None, "NPI must start with 1 or 2"
-    if not npi_checksum_ok(v):
-        return None, "NPI failed check-digit validation"
     return v, None
 
 

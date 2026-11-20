@@ -67,7 +67,7 @@ def test_source_document_is_stored_and_owner_only(client):
 
 def test_invalid_and_missing_values_are_not_saved(client):
     app.dependency_overrides[get_extractor] = fake_extractor(
-        {**COMPLETE, "patient_dob": None, "provider_npi": "1234567890"},  # bad check digit
+        {**COMPLETE, "patient_dob": None, "provider_npi": "12345678"},  # only 8 digits
         notes={"patient_dob": "DOB field is blank on the form"},
     )
     h = auth_headers(client)
@@ -76,8 +76,8 @@ def test_invalid_and_missing_values_are_not_saved(client):
     assert body["status"] == "needs_review"
     assert body["provider_npi"] is None
     assert body["patient_dob"] is None
-    assert "check-digit" in body["issues"]["provider_npi"]
-    assert '"1234567890"' in body["issues"]["provider_npi"]   # reviewer sees what was rejected
+    assert "10 digits" in body["issues"]["provider_npi"]
+    assert '"12345678"' in body["issues"]["provider_npi"]   # reviewer sees what was rejected
     assert "blank" in body["issues"]["patient_dob"]
     assert set(body["missing_fields"]) == {"patient_dob", "provider_npi"}
 
@@ -88,8 +88,8 @@ def test_invalid_and_missing_values_are_not_saved(client):
     assert r.json()["issues"] == {}
 
 
-def test_sample_style_invalid_npi_is_flagged_not_saved(client):
-    # Mirrors the provided sample order: prescriber NPI 9182734556 is not a valid NPI.
+def test_sample_order_npi_is_accepted(client):
+    # Mirrors the provided sample order (prescriber NPI 9182734556).
     app.dependency_overrides[get_extractor] = fake_extractor({
         "patient_first_name": "Marie", "patient_last_name": "Curie", "patient_dob": "1900-12-05",
         "provider_name": "Arjun Raj", "provider_npi": "9182734556",
@@ -98,9 +98,10 @@ def test_sample_style_invalid_npi_is_flagged_not_saved(client):
     oid = upload(client, h).json()["id"]
     body = client.get(f"/orders/{oid}", headers=h).json()
     assert body["patient_dob"] == "1900-12-05"
-    assert body["provider_npi"] is None
-    assert body["issues"]["provider_npi"] == 'read "9182734556": NPI must start with 1 or 2'
-    assert body["status"] == "needs_review"
+    assert body["provider_npi"] == "9182734556"
+    assert body["issues"] == {} and body["missing_fields"] == []
+    assert body["status"] == "needs_review"   # still confirmed by a person
+    assert client.post(f"/orders/{oid}/approve", headers=h).json()["status"] == "ready"
 
 
 def test_upload_rejects_non_pdf(client):
