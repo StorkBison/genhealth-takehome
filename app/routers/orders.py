@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
+from app.config import get_settings
+from app.services.extraction import ExtractionError, check_pdf, extract_order_fields
 from app.database import get_db
 from app.models import Order, OrderStatus, User
 from app.schemas import OrderCreate, OrderList, OrderOut, OrderUpdate
@@ -46,6 +48,49 @@ def _validate_or_422(data: dict) -> dict:
 def create_order(body: OrderCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     clean = _validate_or_422(body.model_dump())
     order = Order(owner_id=user.id, issues={}, **clean)
+    order.status = compute_status(order)
+    db.add(order)
+    db.commit()
+    return to_out(order)
+
+
+def get_extractor():
+    """Dependency so tests (or a different backend) can swap the extraction implementation."""
+    return extract_order_fields
+
+
+@router.post("/upload", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
+def upload_order_pdf(
+    file: UploadFile = File(..., description="DME order PDF (scanned or digital)"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    extractor=Depends(get_extractor),
+):
+    """Create an order from a PDF.
+
+    Extracted values pass through the same validators as manual input. A value that fails validation
+    is not saved; it is left null and the reason is recorded in `issues`. A field the document doesn't
+    clearly contain is left null and reported in `missing_fields`. If anything is missing or invalid,
+    the order is saved with status `needs_review` instead of `ready`.
+    """
+    data = file.file.read(get_settings().max_upload_mb * 1024 * 1024 + 1)
+    try:
+        check_pdf(data, file.filename)
+        result = extractor(data)
+    except ExtractionError as e:
+        raise HTTPException(e.status_code, e.message)
+
+    clean, issues = validate_fields(result.values)
+    for name, note in result.notes.items():
+        if clean.get(name) is None and name not in issues:
+            issues[name] = f"not extracted: {note}"
+    order = Order(
+        owner_id=user.id,
+        source_filename=(file.filename or "upload.pdf")[:255],
+        issues=issues,
+        raw_extraction=result.raw,
+        **clean,
+    )
     order.status = compute_status(order)
     db.add(order)
     db.commit()
