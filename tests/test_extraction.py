@@ -49,7 +49,7 @@ def test_gemini_is_default_and_parses_output(monkeypatch, settings):
     result = extract_order_fields(b"%PDF-1.4 fake")
     assert result.values == EXPECTED
     assert result.notes == {"patient_dob": "illegible"}
-    assert sent["model"] == "gemini-2.5-flash"
+    assert sent["model"] == settings.gemini_model
     pdf_part = sent["contents"][0]
     assert pdf_part.inline_data.mime_type == "application/pdf"
     assert sent["config"].response_mime_type == "application/json"
@@ -73,6 +73,41 @@ def test_gemini_truncated_and_malformed(monkeypatch, settings):
     monkeypatch.setattr(extraction, "_gemini_client", lambda: _gemini(payload=["not", "an", "object"]))
     with pytest.raises(ExtractionError):
         extract_order_fields(b"%PDF-1.4 fake")
+
+
+def test_gemini_retries_transient_errors(monkeypatch, settings):
+    from google.genai import errors
+    monkeypatch.setattr(settings, "extraction_provider", "gemini")
+    monkeypatch.setattr(extraction, "GEMINI_RETRY_DELAYS", (0, 0))
+    monkeypatch.setattr(extraction.time, "sleep", lambda s: None)
+    ok = _gemini()
+    calls = {"n": 0}
+
+    def flaky(**kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise errors.ServerError(503, {"error": {"code": 503, "message": "overloaded", "status": "UNAVAILABLE"}})
+        if calls["n"] == 2:
+            raise ConnectionError("getaddrinfo failed")
+        return ok.models.generate_content(**kwargs)
+
+    monkeypatch.setattr(extraction, "_gemini_client", lambda: SimpleNamespace(models=SimpleNamespace(generate_content=flaky)))
+    assert extract_order_fields(b"%PDF-1.4 fake").values == EXPECTED
+    assert calls["n"] == 3
+
+
+def test_gemini_gives_up_after_retries(monkeypatch, settings):
+    monkeypatch.setattr(settings, "extraction_provider", "gemini")
+    monkeypatch.setattr(extraction, "GEMINI_RETRY_DELAYS", (0,))
+    monkeypatch.setattr(extraction.time, "sleep", lambda s: None)
+
+    def down(**kwargs):
+        raise ConnectionError("getaddrinfo failed")
+
+    monkeypatch.setattr(extraction, "_gemini_client", lambda: SimpleNamespace(models=SimpleNamespace(generate_content=down)))
+    with pytest.raises(ExtractionError) as e:
+        extract_order_fields(b"%PDF-1.4 fake")
+    assert e.value.status_code == 502 and "reach" in e.value.message
 
 
 def test_gemini_missing_key_is_503(monkeypatch, settings):

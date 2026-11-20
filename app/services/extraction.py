@@ -9,6 +9,7 @@ import base64
 import io
 import json
 import logging
+import time
 from dataclasses import dataclass, field
 
 from pypdf import PdfReader
@@ -152,6 +153,8 @@ def extract_order_fields(data: bytes) -> ExtractionResult:
 # Inline request payloads are capped at about 20 MB, and base64 adds a third, so larger files go
 # through the Files API instead.
 GEMINI_INLINE_LIMIT = 14 * 1024 * 1024
+GEMINI_RETRYABLE = {429, 500, 502, 503, 504}
+GEMINI_RETRY_DELAYS = (2, 5, 12)  # seconds between attempts
 GEMINI_BLOCKED = {"SAFETY", "PROHIBITED_CONTENT", "SPII", "BLOCKLIST", "RECITATION", "IMAGE_SAFETY"}
 
 
@@ -177,16 +180,27 @@ def _extract_gemini(data: bytes) -> ExtractionResult:
             doc = uploaded
         else:
             doc = types.Part.from_bytes(data=data, mime_type="application/pdf")
-        response = client.models.generate_content(
-            model=s.gemini_model,
-            contents=[doc, USER_PROMPT],
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0,
-                response_mime_type="application/json",
-                response_json_schema=OUTPUT_SCHEMA,
-            ),
+        config = types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            temperature=0,
+            response_mime_type="application/json",
+            response_json_schema=OUTPUT_SCHEMA,
         )
+        # Retry transient overload/rate-limit responses with backoff; this runs in a background task.
+        for attempt, delay in enumerate(GEMINI_RETRY_DELAYS + (None,)):
+            try:
+                response = client.models.generate_content(model=s.gemini_model, contents=[doc, USER_PROMPT], config=config)
+                break
+            except errors.APIError as e:
+                if delay is None or e.code not in GEMINI_RETRYABLE:
+                    raise
+                log.warning("Gemini %s on attempt %d; retrying in %ss", e.code, attempt + 1, delay)
+            except Exception as e:  # transport-level failure (DNS, connection reset, timeout)
+                if delay is None:
+                    log.error("Gemini unreachable: %r", e)
+                    raise ExtractionError("Could not reach the extraction service", 502) from e
+                log.warning("Gemini connection error on attempt %d (%r); retrying in %ss", attempt + 1, e, delay)
+            time.sleep(delay)
     except errors.ClientError as e:
         log.error("Gemini client error %s: %s", e.code, e.message)
         if e.code == 429:
@@ -199,7 +213,10 @@ def _extract_gemini(data: bytes) -> ExtractionResult:
         raise ExtractionError("Extraction service is unavailable; try again shortly", 502) from e
     except errors.APIError as e:
         raise ExtractionError(f"Extraction failed: {e.message}", 502) from e
-    except (OSError, TimeoutError) as e:
+    except ExtractionError:
+        raise
+    except Exception as e:  # e.g. network failure during the Files API upload
+        log.error("Gemini request failed: %r", e)
         raise ExtractionError("Could not reach the extraction service", 502) from e
     finally:
         if uploaded is not None:

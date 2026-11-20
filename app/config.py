@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # Which LLM reads the PDFs: "gemini" (default) or "anthropic"
     extraction_provider: str = "gemini"
     gemini_api_key: str | None = None
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.8-flash"
     anthropic_api_key: str | None = None
     anthropic_model: str = "claude-opus-5-5"
     anthropic_effort: str = "medium"

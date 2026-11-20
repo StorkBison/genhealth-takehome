@@ -1,4 +1,4 @@
-# Order Intake Service
+﻿# Order Intake Service
 
 A REST API (Python / FastAPI) for durable medical equipment (DME) orders. Users create orders by hand or
 upload a faxed/scanned order PDF. The service extracts the patient's name and date of birth and the
@@ -40,7 +40,7 @@ Or open `/docs`, register, click **Authorize**, and try every endpoint from the 
 | POST | `/auth/token` | Log in (OAuth2 password form) and get a bearer token |
 | GET | `/auth/me` | Current user |
 | POST | `/orders` | Create an order manually (starts as `draft`) |
-| POST | `/orders/upload` | Upload a PDF → `202` with status `processing`; extraction runs in the background |
+| POST | `/orders/upload` | Upload a PDF â†’ `202` with status `processing`; extraction runs in the background |
 | GET | `/orders?q=&status=&days=&limit=&offset=` | List and search your orders |
 | GET | `/orders/stats` | Counts by status |
 | GET / PATCH / DELETE | `/orders/{id}` | Read, edit (saves as `draft`), or delete one of your orders |
@@ -50,7 +50,7 @@ Or open `/docs`, register, click **Authorize**, and try every endpoint from the 
 
 An order moves through these statuses:
 
-`processing` → `needs_review` (or `failed`) → `draft` (saved, not approved) → `ready` (approved by a person)
+`processing` â†’ `needs_review` (or `failed`) â†’ `draft` (saved, not approved) â†’ `ready` (approved by a person)
 
 Extracted orders are **never auto-approved**. Even when every field passed validation, a person confirms
 them against the source document first, because a wrong value means a denied claim. Editing an approved
@@ -59,7 +59,7 @@ order and saving it as a draft sends it back for approval.
 ## How extraction works and why it doesn't guess
 
 1. **Pre-checks before any tokens are spent:** the file must be a PDF (checked by magic bytes), be no larger than 20 MB and 100 pages, and be neither encrypted nor corrupt.
-2. **The model reads the PDF directly.** The default is **Gemini 2.5 Flash** (`EXTRACTION_PROVIDER=gemini`, `GEMINI_MODEL`). It reads each page as text and as an image, so scanned faxes with no text layer, handwriting and multi-page packets work without a separate OCR step. It's fast and inexpensive for high-volume intake. Files over about 14 MB go through the Gemini Files API instead of inline upload. Claude (`EXTRACTION_PROVIDER=anthropic`, `ANTHROPIC_MODEL`) is a drop-in alternative that uses the same prompt, schema and validation. The provider is a configuration choice, not a code change.
+2. **The model reads the PDF directly.** The default is **Gemini Flash** (`EXTRACTION_PROVIDER=gemini`, `GEMINI_MODEL`, default `gemini-3.8-flash`, because Google no longer offers `gemini-2.5-flash` to new API keys). It reads each page as text and as an image, so scanned faxes with no text layer, handwriting and multi-page packets work without a separate OCR step. It's fast and inexpensive for high-volume intake. Files over about 14 MB go through the Gemini Files API instead of inline upload. Overload, rate-limit and network errors are retried with backoff (2 s, 5 s, 12 s). Claude (`EXTRACTION_PROVIDER=anthropic`, `ANTHROPIC_MODEL`) is a drop-in alternative that uses the same prompt, schema and validation. The provider is a configuration choice, not a code change.
 3. **Constrained output.** The response must match a JSON schema. For each field the model returns `value`, the `source_text` it read the value from, and a `note`. The prompt explains the cost of errors: a wrong value means a denied claim, while a missing one only means a person reviews it. It tells the model to return `null` rather than infer, complete or pick between ambiguous candidates (for example several NPIs, or a two-digit birth year). It also says which person is the patient and which is the ordering provider, and lists the look-alikes to ignore: caregiver, insurance subscriber, DME supplier, group NPI, fax sender.
 4. **Deterministic validation before saving.** Manual input and extracted input go through the same validators:
    - **NPI:** exactly 10 digits, starting with 1 or 2, and passing the CMS Luhn check digit (with the `80840` prefix). This catches most misread or invented digits.
