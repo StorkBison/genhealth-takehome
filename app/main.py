@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -35,16 +36,31 @@ def add_missing_columns() -> None:
                 logging.getLogger(__name__).info("Added column %s.%s", table.name, column.name)
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
+_initialized = False
+
+
+def init_app() -> None:
+    """Check config and prepare the database. Safe to call more than once."""
+    global _initialized
+    if _initialized:
+        return
     s = get_settings()
     if s.environment == "production" and (s.jwt_secret == DEFAULT_SECRET or len(s.jwt_secret) < 32):
         raise RuntimeError("JWT_SECRET must be set to a strong value in production")
     # MVP: create tables on boot. A real deployment would run Alembic migrations instead.
     Base.metadata.create_all(bind=engine)
     add_missing_columns()
-    with SessionLocal() as db:
-        orders.mark_interrupted_extractions(db)
+    if not s.extraction_inline:
+        # Background extractions die with the process; surface them instead of leaving orders stuck.
+        # (Not done for inline extraction: another serverless instance may be mid-request.)
+        with SessionLocal() as db:
+            orders.mark_interrupted_extractions(db)
+    _initialized = True
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_app()
     yield
 
 
@@ -72,6 +88,11 @@ class FrontendFiles(StaticFiles):
 
 if FRONTEND_DIR.is_dir():
     app.mount("/app", FrontendFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+
+
+if os.environ.get("VERCEL"):
+    # Serverless runtimes don't guarantee ASGI lifespan events, so initialize at import time.
+    init_app()
 
 
 @app.get("/", include_in_schema=False)

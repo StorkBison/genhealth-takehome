@@ -6,3 +6,7 @@ __pycache__/
 .pytest_cache/
 current_task_page.md
 .shots/
+
+.vercel
+.env*
+!.env.example

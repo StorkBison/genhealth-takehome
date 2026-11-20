@@ -1,0 +1,12 @@
+.venv
+.env
+*.db
+.shots
+.pytest_cache
+__pycache__
+tests
+design
+Dockerfile
+render.yaml
+current_task_page.md
+.env.local

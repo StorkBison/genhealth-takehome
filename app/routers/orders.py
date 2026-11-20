@@ -110,6 +110,15 @@ def run_extraction(order_id: int, data: bytes, media_type: str, extractor) -> No
         db.commit()
 
 
+def _schedule(background: BackgroundTasks, db: Session, order: Order, data: bytes, media_type: str, extractor) -> None:
+    """Run extraction after the response (default) or inside this request (serverless hosts)."""
+    if get_settings().extraction_inline:
+        run_extraction(order.id, data, media_type, extractor)
+        db.refresh(order)
+    else:
+        background.add_task(run_extraction, order.id, data, media_type, extractor)
+
+
 def mark_interrupted_extractions(db: Session) -> None:
     """Background work does not survive a restart; surface it instead of leaving orders stuck."""
     db.execute(
@@ -161,7 +170,7 @@ def upload_order_pdf(
     )
     db.add(order)
     db.commit()
-    background.add_task(run_extraction, order.id, data, media_type, extractor)
+    _schedule(background, db, order, data, media_type, extractor)
     return to_out(order)
 
 
@@ -182,7 +191,7 @@ def retry_extraction(
     order.status = OrderStatus.processing
     order.error_message = None
     db.commit()
-    background.add_task(run_extraction, order.id, order.document, order.document_type or PDF, extractor)
+    _schedule(background, db, order, order.document, order.document_type or PDF, extractor)
     return to_out(order)
 
 

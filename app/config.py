@@ -23,7 +23,27 @@ class Settings(BaseSettings):
     max_upload_mb: int = 20
     max_pdf_pages: int = 100
 
+    # Serverless hosts (Vercel) may freeze the process once the response is sent, so background work
+    # isn't reliable there. When true, extraction runs inside the upload request instead.
+    extraction_inline: bool = False
+
+
+def _vercel_defaults() -> dict:
+    """Sensible defaults when running on Vercel (it sets VERCEL=1). Explicit env vars still win."""
+    import os
+
+    if not os.environ.get("VERCEL"):
+        return {}
+    defaults = {"extraction_inline": True}
+    if not os.environ.get("DATABASE_URL"):
+        # Only /tmp is writable on Vercel; this is per-instance and temporary. Set DATABASE_URL to Postgres.
+        defaults["database_url"] = "sqlite:////tmp/orders.db"
+    return defaults
+
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    import os
+
+    defaults = {k: v for k, v in _vercel_defaults().items() if k.upper() not in os.environ}
+    return Settings(**defaults)
