@@ -56,16 +56,8 @@
       n.replaceWith(svg);
     });
   }
-  function logo() {
-    const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('width', 28); svg.setAttribute('height', 28); svg.setAttribute('viewBox', '0 0 32 32'); svg.setAttribute('aria-hidden', 'true');
-    for (const [x, y, w, h, rx, fill] of [[11, 2, 10, 28, 3, '#5B30E8'], [2, 11, 28, 10, 3, '#8D6BF7'], [11, 11, 10, 10, 0, '#3F1DB8']]) {
-      const r = document.createElementNS(NS, 'rect');
-      Object.entries({ x, y, width: w, height: h, rx, fill }).forEach(([k, v]) => r.setAttribute(k, v));
-      svg.append(r);
-    }
-    return svg;
-  }
+  // GenHealth mark (frontend/genhealth-mark.svg); decorative next to the "GenHealth" wordmark
+  const logo = () => el('img', { src: 'genhealth-mark.svg', width: 32, height: 32, alt: '', class: 'brand-mark' });
 
   // =====================================================================
   // Helpers

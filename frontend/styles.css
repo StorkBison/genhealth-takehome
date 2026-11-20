@@ -38,6 +38,9 @@ svg.ic{flex:none;display:block}
 
 /* ---------- brand ---------- */
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.03em;color:var(--ink)}
+.brand-mark{display:block;flex:none}
+.brand-text{display:flex;flex-direction:column;line-height:1.15}
+.brand-text small{font-size:11px;font-weight:500;letter-spacing:0;color:var(--muted);white-space:nowrap}
 
 /* ---------- pills ---------- */
 .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap;line-height:1.3}
