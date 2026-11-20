@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app import models  # noqa: F401  (registers tables on Base.metadata)
 from app.database import Base, engine
+from app.routers import auth, orders
 
 
 @asynccontextmanager
@@ -14,6 +15,8 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Order Intake Service", lifespan=lifespan)
+app.include_router(auth.router)
+app.include_router(orders.router)
 
 
 @app.get("/health")
