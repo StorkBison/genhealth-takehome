@@ -28,24 +28,33 @@ curl -X POST $BASE/orders/upload -H "Authorization: Bearer $TOKEN" -F "file=@sam
 curl $BASE/orders -H "Authorization: Bearer $TOKEN"
 ```
 
+**Web app:** open `/` (served from `/app`). It has sign in and create account, a dashboard, an orders list
+with search, status and date filters, multi-file PDF upload, and a review screen that shows the source PDF
+next to the extracted fields. It's plain JavaScript in [`frontend/`](frontend/) with no build step.
+
 Or open `/docs`, register, click **Authorize**, and try every endpoint from the browser.
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/auth/register` | Create an account (email and password, at least 8 characters) |
+| POST | `/auth/register` | Create an account (8+ character password with a letter, number and symbol) |
 | POST | `/auth/token` | Log in (OAuth2 password form) and get a bearer token |
 | GET | `/auth/me` | Current user |
-| POST | `/orders` | Create an order manually |
-| POST | `/orders/upload` | Create an order from a PDF (multipart field `file`) |
-| GET | `/orders?status=&limit=&offset=` | List your orders |
-| GET / PATCH / DELETE | `/orders/{id}` | Read, partially update, or delete one of your orders |
+| POST | `/orders` | Create an order manually (starts as `draft`) |
+| POST | `/orders/upload` | Upload a PDF → `202` with status `processing`; extraction runs in the background |
+| GET | `/orders?q=&status=&days=&limit=&offset=` | List and search your orders |
+| GET | `/orders/stats` | Counts by status |
+| GET / PATCH / DELETE | `/orders/{id}` | Read, edit (saves as `draft`), or delete one of your orders |
+| POST | `/orders/{id}/approve` | Save any changes and mark `ready`. Refused unless all fields are present and valid |
+| POST | `/orders/{id}/retry` | Re-run extraction on the stored PDF |
+| GET | `/orders/{id}/document` | The original PDF (owner only) |
 
-An order has a `status`:
-- `ready`: all five fields are present and valid.
-- `needs_review`: created from a PDF, but something is missing or failed validation. See `missing_fields` and `issues`.
-- `draft`: created by hand and not complete yet.
+An order moves through these statuses:
 
-A `PATCH` that fixes a field clears the issue for it, and the status is recalculated.
+`processing` → `needs_review` (or `failed`) → `draft` (saved, not approved) → `ready` (approved by a person)
+
+Extracted orders are **never auto-approved**. Even when every field passed validation, a person confirms
+them against the source document first, because a wrong value means a denied claim. Editing an approved
+order and saving it as a draft sends it back for approval.
 
 ## How extraction works and why it doesn't guess
 

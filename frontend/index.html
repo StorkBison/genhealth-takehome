@@ -3,130 +3,295 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Order Intake</title>
+<title>GenHealth · Order Intake</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='11' y='2' width='10' height='28' rx='3' fill='%235B30E8'/%3E%3Crect x='2' y='11' width='28' height='10' rx='3' fill='%238D6BF7'/%3E%3Crect x='11' y='11' width='10' height='10' fill='%233F1DB8'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- ============ SIGN IN ============ -->
-<section class="screen" id="signin" aria-label="Sign in">
-  <div class="auth">
-    <div class="side">
-      <div class="brand" style="font-size:18px">
-        <svg width="32" height="32" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" fill="currentColor" opacity=".18"/><path d="M9 8h7l4 4v8H9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15l2 2 3-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Order Intake
+<!-- ======================= SIGN IN ======================= -->
+<section class="auth" id="v-signin" hidden>
+  <div class="auth-art">
+    <div class="brand" data-logo>GenHealth</div>
+    <h1>Automate DME order intake with AI</h1>
+    <p>Extract, validate, and manage orders from faxed or scanned PDFs — faster, more accurately, and with fewer errors.</p>
+    <svg class="illus" viewBox="0 0 440 300" aria-hidden="true">
+      <ellipse cx="190" cy="270" rx="230" ry="70" fill="#E4DCFD"/>
+      <ellipse cx="190" cy="190" rx="150" ry="70" fill="#EDE7FE"/>
+      <rect x="112" y="34" width="176" height="222" rx="14" fill="#E9E2FE" transform="translate(-14 10)"/>
+      <path d="M126 30h118l44 44v168a14 14 0 0 1-14 14H126a14 14 0 0 1-14-14V44a14 14 0 0 1 14-14z" fill="#FFFFFF" stroke="#8D6BF7" stroke-width="3"/>
+      <path d="M244 30v30a14 14 0 0 0 14 14h30" fill="#DCD1FD" stroke="#8D6BF7" stroke-width="3" stroke-linejoin="round"/>
+      <text x="140" y="96" font-family="Inter, sans-serif" font-weight="800" font-size="28" fill="#5B30E8">DME</text>
+      <rect x="140" y="118" width="120" height="9" rx="4.5" fill="#D9CEFC"/>
+      <rect x="140" y="140" width="96" height="9" rx="4.5" fill="#D9CEFC"/>
+      <rect x="140" y="162" width="120" height="9" rx="4.5" fill="#D9CEFC"/>
+      <rect x="140" y="184" width="72" height="9" rx="4.5" fill="#D9CEFC"/>
+      <circle cx="282" cy="232" r="36" fill="#5B30E8"/>
+      <path d="M266 232l11 11 21-22" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="auth-form">
+    <form id="f-signin" novalidate aria-labelledby="signin-h">
+      <div><h2 id="signin-h">Sign In</h2><p class="lead">Welcome back to GenHealth.</p></div>
+      <p class="formerr" id="si-err" role="alert" hidden></p>
+      <div class="field" id="si-email-f">
+        <label for="si-email">Email</label>
+        <div class="inwrap"><i data-icon="mail" class="lead-ic"></i><input class="input has-lead" id="si-email" type="email" autocomplete="email" placeholder="Enter your email" aria-describedby="si-email-e"></div>
+        <span class="err" id="si-email-e" hidden></span>
       </div>
-      <h2>Faxed DME orders in, checked data out.</h2>
-      <ul>
-        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"/></svg>Upload scanned or digital PDFs, including multi-page packets.</li>
-        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"/></svg>Patient name, date of birth, provider and NPI are read and validated.</li>
-        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"/></svg>Anything unclear is left for you to review, never guessed.</li>
-      </ul>
-    </div>
-    <div class="form">
-      <form id="authForm" novalidate aria-label="Sign in form">
-        <div class="seg" role="tablist" aria-label="Account">
-          <button type="button" role="tab" aria-selected="true" id="tabIn">Sign in</button>
-          <button type="button" role="tab" aria-selected="false" id="tabUp">Create account</button>
-        </div>
-        <p class="formerr" id="authErr" role="alert" hidden></p>
-        <div class="field" id="emField">
-          <label for="em">Email</label>
-          <input id="em" name="email" type="email" autocomplete="email" placeholder="you@clinic.example" aria-describedby="emErr">
-          <span class="err" id="emErr" hidden></span>
-        </div>
-        <div class="field" id="pwField">
-          <label for="pw">Password</label>
-          <input id="pw" name="password" type="password" autocomplete="current-password" aria-describedby="pwErr pwHint">
-          <span class="err" id="pwErr" hidden></span>
-          <p class="hint" id="pwHint" hidden>At least 8 characters.</p>
-        </div>
-        <button class="btn btn-primary" type="submit" id="authBtn">Sign in</button>
-        <p class="hint">Each account sees only its own orders.</p>
-      </form>
-    </div>
+      <div class="field" id="si-pw-f">
+        <label for="si-pw">Password</label>
+        <div class="inwrap"><i data-icon="lock" class="lead-ic"></i><input class="input has-lead has-trail" id="si-pw" type="password" autocomplete="current-password" placeholder="Enter your password" aria-describedby="si-pw-e"><button type="button" class="ghostbtn trail" data-reveal="si-pw" aria-label="Show password"><i data-icon="eye"></i></button></div>
+        <span class="err" id="si-pw-e" hidden></span>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit" id="si-btn">Sign In</button>
+      <p class="auth-foot"><button type="button" class="linkbtn" id="forgot" style="font-size:15px">Forgot your password?</button></p>
+      <p class="formnote" id="forgot-note" hidden>Password reset by email isn't part of this MVP. Ask your administrator to reset your account, or create a new one.</p>
+      <p class="auth-foot">New to GenHealth? <a href="#/signup" style="font-weight:600">Create an account</a></p>
+    </form>
   </div>
 </section>
 
-<!-- ============ APP SHELL ============ -->
-<div id="shell" hidden>
-  <header class="topbar"><div class="wrap">
-    <div class="brand">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" fill="var(--accent)"/><path d="M9 8h7l4 4v8H9z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15l2 2 3-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Order Intake
+<!-- ======================= SIGN UP ======================= -->
+<section class="auth" id="v-signup" hidden>
+  <div class="auth-art">
+    <div class="brand" data-logo>GenHealth</div>
+    <h1>Create your GenHealth account</h1>
+    <p>Start automating DME order intake with AI in minutes.</p>
+    <svg class="illus" viewBox="0 0 440 300" aria-hidden="true">
+      <ellipse cx="200" cy="280" rx="230" ry="60" fill="#E4DCFD"/>
+      <rect x="82" y="92" width="236" height="150" rx="14" fill="#F7F5FF" stroke="#8D6BF7" stroke-width="3"/>
+      <rect x="96" y="106" width="208" height="122" rx="6" fill="#EFEAFE"/>
+      <path d="M58 250h284l-18 18H76z" fill="#B9A6FA"/>
+      <rect x="40" y="244" width="320" height="10" rx="5" fill="#8D6BF7"/>
+      <path d="M160 52h70l30 30v110a10 10 0 0 1-10 10H160a10 10 0 0 1-10-10V62a10 10 0 0 1 10-10z" fill="#FFFFFF" stroke="#8D6BF7" stroke-width="3"/>
+      <path d="M230 52v22a8 8 0 0 0 8 8h22" fill="#DCD1FD" stroke="#8D6BF7" stroke-width="3" stroke-linejoin="round"/>
+      <text x="168" y="104" font-family="Inter, sans-serif" font-weight="800" font-size="22" fill="#5B30E8">DME</text>
+      <rect x="168" y="120" width="72" height="7" rx="3.5" fill="#D9CEFC"/>
+      <rect x="168" y="136" width="58" height="7" rx="3.5" fill="#D9CEFC"/>
+      <rect x="168" y="152" width="72" height="7" rx="3.5" fill="#D9CEFC"/>
+      <circle cx="262" cy="196" r="26" fill="#5B30E8"/>
+      <path d="M262 208v-24M252 194l10-10 10 10" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M284 40l-6 14M302 56l-14 6M296 32l-4 8" stroke="#8D6BF7" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="auth-form">
+    <form id="f-signup" novalidate aria-labelledby="signup-h">
+      <div><h2 id="signup-h">Create Account</h2><p class="lead">Get started with GenHealth.</p></div>
+      <p class="formerr" id="su-err" role="alert" hidden></p>
+      <div class="field" id="su-email-f">
+        <label for="su-email">Email</label>
+        <div class="inwrap"><i data-icon="mail" class="lead-ic"></i><input class="input has-lead" id="su-email" type="email" autocomplete="email" placeholder="Enter your email" aria-describedby="su-email-e"></div>
+        <span class="err" id="su-email-e" hidden></span>
+      </div>
+      <div class="field" id="su-pw-f">
+        <label for="su-pw">Password</label>
+        <div class="inwrap"><i data-icon="lock" class="lead-ic"></i><input class="input has-lead has-trail" id="su-pw" type="password" autocomplete="new-password" placeholder="Create a password" aria-describedby="su-pw-e su-rule"><button type="button" class="ghostbtn trail" data-reveal="su-pw" aria-label="Show password"><i data-icon="eye"></i></button></div>
+        <span class="err" id="su-pw-e" hidden></span>
+      </div>
+      <div class="field" id="su-pw2-f">
+        <label for="su-pw2">Confirm Password</label>
+        <div class="inwrap"><i data-icon="lock" class="lead-ic"></i><input class="input has-lead has-trail" id="su-pw2" type="password" autocomplete="new-password" placeholder="Confirm your password" aria-describedby="su-pw2-e"><button type="button" class="ghostbtn trail" data-reveal="su-pw2" aria-label="Show password"><i data-icon="eye"></i></button></div>
+        <span class="err" id="su-pw2-e" hidden></span>
+      </div>
+      <p class="rule" id="su-rule">Use at least 8 characters with a letter, number, and symbol.</p>
+      <button class="btn btn-primary btn-block" type="submit" id="su-btn">Create Account</button>
+      <p class="auth-foot">Already have an account? <a href="#/signin" style="font-weight:600">Sign In</a></p>
+    </form>
+  </div>
+</section>
+
+<!-- ======================= APP ======================= -->
+<div class="app" id="app" hidden>
+  <aside class="sidebar">
+    <div class="brand" data-logo>GenHealth</div>
+    <nav class="nav" aria-label="Main">
+      <a href="#/dashboard" data-nav="dashboard"><i data-icon="home"></i>Dashboard</a>
+      <a href="#/orders" data-nav="orders"><i data-icon="orders"></i>Orders</a>
+      <a href="#/upload" data-nav="upload"><i data-icon="upload"></i>Upload Order</a>
+      <a href="#/settings" data-nav="settings"><i data-icon="settings"></i>Settings</a>
+    </nav>
+    <div class="userchip">
+      <button type="button" id="userBtn" aria-haspopup="menu" aria-expanded="false">
+        <span class="avatar" id="uAvatar"></span>
+        <span class="who"><b id="uName"></b><span id="uEmail"></span></span>
+        <i data-icon="chevDown" class="chev" data-size="16"></i>
+      </button>
+      <div class="menu" id="userMenu" role="menu" hidden>
+        <a href="#/settings" role="menuitem"><i data-icon="settings" data-size="16"></i>Settings</a>
+        <button type="button" role="menuitem" class="danger" id="signOut"><i data-icon="logout" data-size="16"></i>Sign out</button>
+      </div>
     </div>
-    <nav aria-label="Account"><span id="who"></span><button type="button" class="linkbtn" id="signOut">Sign out</button></nav>
-  </div></header>
+  </aside>
 
-  <!-- ORDERS -->
-  <section class="screen" id="orders" aria-label="Orders">
-    <main><div class="wrap stack">
-      <div class="head">
-        <div><h1>Orders</h1><p class="sub">Upload a faxed order and check what was read before it goes to billing.</p></div>
-        <button class="btn btn-secondary" type="button" id="newManual">New order manually</button>
+  <main class="main" id="main">
+    <!-- DASHBOARD -->
+    <section class="view" id="v-dashboard" hidden aria-labelledby="dash-h">
+      <div class="pagehead">
+        <div><h1 id="dash-h">Dashboard</h1><p class="sub">An overview of your order intake.</p></div>
+        <a class="btn btn-primary" href="#/upload"><i data-icon="plus" data-size="18"></i>Upload Order</a>
       </div>
-
-      <div class="drop" id="drop">
-        <div class="ico" id="dropIco"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></div>
-        <div class="txt" aria-live="polite"><p class="t1" id="dropTitle">Drop an order PDF here</p><p class="t2" id="dropSub">Scanned faxes and multi-page packets work. PDF only, up to 20 MB and 100 pages.</p></div>
-        <label class="btn btn-primary filelabel" id="chooseBtn">Choose PDF<input type="file" accept="application/pdf,.pdf" id="file"></label>
+      <div class="stats" id="dash-stats"></div>
+      <div class="two">
+        <div class="card panel">
+          <h2>Needs your review <a href="#/orders?status=needs_review">View all</a></h2>
+          <ul class="olist" id="dash-review"></ul>
+        </div>
+        <div class="card panel">
+          <h2>Recent orders <a href="#/orders">View all</a></h2>
+          <ul class="olist" id="dash-recent"></ul>
+        </div>
       </div>
+    </section>
 
-      <div class="card" style="overflow:hidden">
-        <div class="tabs" role="tablist" aria-label="Filter by status" id="tabs"></div>
+    <!-- ORDERS -->
+    <section class="view" id="v-orders" hidden aria-labelledby="orders-h">
+      <div class="pagehead">
+        <div><h1 id="orders-h">Orders</h1><p class="sub">DME orders extracted from fax or PDF documents.</p></div>
+        <a class="btn btn-primary" href="#/upload"><i data-icon="plus" data-size="18"></i>Upload Order</a>
+      </div>
+      <div class="stats" id="ord-stats"></div>
+      <div class="toolbar">
+        <label class="search"><span class="sr">Search orders</span><i data-icon="search" data-size="18"></i><input type="search" id="ord-q" placeholder="Search by patient, provider, NPI or order ID…" autocomplete="off"></label>
+        <div class="selwrap"><label class="sr" for="ord-status">Status</label>
+          <select class="select" id="ord-status">
+            <option value="">All Status</option><option value="ready">Ready</option><option value="needs_review">Needs Review</option>
+            <option value="processing">In Process</option><option value="draft">Draft</option><option value="failed">Failed</option>
+          </select><i data-icon="chevDown" class="chev" data-size="16"></i></div>
+        <div class="selwrap"><i data-icon="calendar" class="lead-ic" data-size="16"></i><label class="sr" for="ord-days">Date range</label>
+          <select class="select has-lead" id="ord-days">
+            <option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="">All time</option>
+          </select><i data-icon="chevDown" class="chev" data-size="16"></i></div>
+      </div>
+      <div class="card tablecard">
         <div class="tablebox">
           <table>
-            <thead><tr><th scope="col">Patient</th><th scope="col">Date of birth</th><th scope="col">Ordering provider</th><th scope="col">NPI</th><th scope="col">Source</th><th scope="col">Status</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
-            <tbody id="rows"></tbody>
+            <thead><tr><th scope="col">Order ID</th><th scope="col">Patient</th><th scope="col">Provider</th><th scope="col">Order Date</th><th scope="col">Status</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+            <tbody id="ord-rows"></tbody>
           </table>
         </div>
-        <p class="empty" id="empty" hidden></p>
+        <div class="emptystate" id="ord-empty" hidden></div>
+        <div class="tfoot"><span id="ord-showing" aria-live="polite"></span><div class="pager" id="ord-pager"></div></div>
       </div>
-    </div></main>
-  </section>
+    </section>
 
-  <!-- REVIEW / EDIT -->
-  <section class="screen" id="review" aria-label="Review order">
-    <main><div class="wrap stack">
-      <div class="head">
+    <!-- UPLOAD -->
+    <section class="view" id="v-upload" hidden aria-labelledby="up-h">
+      <div class="pagehead">
+        <div><h1 id="up-h">Upload Order</h1><p class="sub">Upload faxed or scanned DME order PDFs. Fields are extracted automatically, then you review them.</p></div>
+      </div>
+      <div class="dropzone" id="drop">
+        <div class="bub"><i data-icon="cloudUp" data-size="30"></i></div>
+        <h2>Drag and drop order PDFs here</h2>
+        <p>Scanned faxes and multi-page packets work. PDF only, up to 20 MB and 100 pages each.</p>
+        <label class="btn btn-primary filelabel"><i data-icon="upload" data-size="18"></i>Choose files<input type="file" id="up-file" accept="application/pdf,.pdf" multiple></label>
+      </div>
+      <div class="card" id="up-card" hidden>
+        <div class="panel" style="padding-bottom:4px"><h2>Uploads this session</h2></div>
+        <ul class="queue" id="up-queue" aria-live="polite"></ul>
+      </div>
+    </section>
+
+    <!-- REVIEW -->
+    <section class="view" id="v-review" hidden aria-labelledby="rv-h">
+      <div class="pagehead">
         <div>
-          <button type="button" class="linkbtn" data-go="orders">← All orders</button>
-          <h1 style="margin-top:8px"><span id="rvTitle">Order</span> <span class="pill" id="rvPill" style="vertical-align:middle;margin-left:8px"></span></h1>
-          <p class="sub" id="rvSub"></p>
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="#/orders"><i data-icon="arrowLeft" data-size="16"></i>Orders</a><span aria-hidden="true">/</span><b id="rv-crumb"></b></nav>
+          <h1 id="rv-h">Review Order</h1>
+          <p class="sub" id="rv-sub">Verify the extracted information before saving.</p>
         </div>
+        <span id="rv-status"></span>
       </div>
 
-      <div class="banner" role="status" id="rvBanner" hidden>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <div><p style="font-weight:600" id="rvBannerTitle"></p><p style="font-size:14px" id="rvBannerText"></p></div>
-      </div>
-
-      <div class="split">
-        <div class="card docpane" aria-label="Uploaded document" id="docPane">
-          <iframe class="docframe" id="docFrame" title="Uploaded PDF" hidden></iframe>
-          <div class="page" id="docPlaceholder">The original PDF is shown here right after upload. It isn't stored on the server.</div>
-        </div>
-
-        <form class="card fields" id="orderForm" novalidate aria-label="Order fields">
-          <p class="formerr" id="formErr" role="alert" hidden></p>
-          <h2 style="margin:0;font-size:18px">Patient</h2>
-          <div class="grid2" id="grpPatient"></div>
-          <div id="grpDob"></div>
-          <h2 style="margin:8px 0 0;font-size:18px">Ordering provider</h2>
-          <div id="grpProvider" class="stack" style="gap:20px"></div>
-          <div class="actions">
-            <button class="btn btn-danger" type="button" id="delBtn">Delete order</button>
-            <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <button class="btn btn-secondary" type="button" data-go="orders">Cancel</button>
-              <button class="btn btn-primary" type="submit" id="saveBtn">Save changes</button>
+      <div class="review">
+        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+          <div class="card statecard" id="rv-processing" hidden>
+            <span class="spinner lg" aria-hidden="true"></span>
+            <h2>Reading the document…</h2>
+            <p>Patient and provider details are being extracted and checked. This page updates automatically, usually within a minute.</p>
+          </div>
+          <div class="card statecard" id="rv-failed" hidden>
+            <i data-icon="xCircle" data-size="40" style="color:var(--err)"></i>
+            <h2>Extraction failed</h2>
+            <p id="rv-failed-msg"></p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+              <button type="button" class="btn btn-primary" id="rv-retry"><i data-icon="refresh" data-size="18"></i>Retry extraction</button>
+              <button type="button" class="btn btn-outline" id="rv-manual">Enter manually</button>
             </div>
           </div>
-        </form>
+
+          <form class="card fieldscard" id="rv-form" novalidate>
+            <p class="formerr" id="rv-err" role="alert" hidden></p>
+            <div class="section">
+              <h2 class="sechead"><i data-icon="user"></i>Patient Information</h2>
+              <div class="section" id="rv-patient"></div>
+            </div>
+            <div class="divider"></div>
+            <div class="section">
+              <h2 class="sechead"><i data-icon="steth"></i>Ordering Provider</h2>
+              <div class="section" id="rv-provider"></div>
+            </div>
+            <div class="notice" id="rv-notice" role="status"></div>
+          </form>
+        </div>
+
+        <div class="card doccard" id="rv-doc">
+          <div class="tabs" role="tablist" aria-label="Source">
+            <button type="button" role="tab" id="tab-src" aria-selected="true" aria-controls="pane-src">Source Document</button>
+            <button type="button" role="tab" id="tab-json" aria-selected="false" aria-controls="pane-json">Extraction JSON</button>
+          </div>
+          <div id="pane-src" role="tabpanel" aria-labelledby="tab-src" style="display:flex;flex-direction:column;gap:12px">
+            <div class="doctools" id="doc-tools">
+              <div class="pagenav">
+                <button type="button" class="iconbtn" id="pg-prev" aria-label="Previous page"><i data-icon="chevLeft" data-size="16"></i></button>
+                <span id="pg-label" aria-live="polite">Page 1 of 1</span>
+                <button type="button" class="iconbtn" id="pg-next" aria-label="Next page"><i data-icon="chevRight" data-size="16"></i></button>
+              </div>
+              <div class="zoom"><label class="sr" for="zoom">Zoom</label>
+                <select id="zoom"><option value="fit">Fit width</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select>
+                <i data-icon="chevDown" data-size="16"></i></div>
+            </div>
+            <div class="viewer" id="viewer"></div>
+          </div>
+          <div id="pane-json" role="tabpanel" aria-labelledby="tab-json" hidden>
+            <pre class="json mono" id="json"></pre>
+          </div>
+        </div>
       </div>
-    </div></main>
-  </section>
+
+      <div class="actionsbar" id="rv-actions">
+        <div class="grp">
+          <a class="btn btn-outline" href="#/orders"><i data-icon="arrowLeft" data-size="18"></i>Back</a>
+          <button type="button" class="btn btn-danger" id="rv-delete"><i data-icon="trash" data-size="18"></i>Delete</button>
+        </div>
+        <div class="grp">
+          <button type="button" class="btn btn-soft" id="rv-draft">Save as Draft</button>
+          <button type="button" class="btn btn-primary" id="rv-approve"><i data-icon="check" data-size="18"></i>Approve &amp; Save</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="v-settings" hidden aria-labelledby="set-h">
+      <div class="pagehead"><div><h1 id="set-h">Settings</h1><p class="sub">Your account and API access.</p></div></div>
+      <div class="settings">
+        <div class="card panel">
+          <h2>Account</h2>
+          <div style="display:flex;align-items:center;gap:14px"><span class="avatar lg" id="set-avatar"></span><div><b id="set-name" style="font-size:16px"></b><div style="color:var(--muted)" id="set-email"></div></div></div>
+          <dl class="kv"><dt>Email</dt><dd id="set-email2"></dd><dt>Member since</dt><dd id="set-since"></dd><dt>Data access</dt><dd>You can only see orders created by this account.</dd></dl>
+          <div><button type="button" class="btn btn-outline" id="set-signout"><i data-icon="logout" data-size="18"></i>Sign out</button></div>
+        </div>
+        <div class="card panel">
+          <h2>API</h2>
+          <p style="margin:0;color:var(--muted)">Everything in this app is available over the REST API with the same bearer token.</p>
+          <div><a class="btn btn-soft" href="/docs" target="_blank" rel="noopener"><i data-icon="code" data-size="18"></i>Open API documentation</a></div>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>

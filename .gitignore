@@ -5,3 +5,4 @@ __pycache__/
 *.db
 .pytest_cache/
 current_task_page.md
+.shots/
